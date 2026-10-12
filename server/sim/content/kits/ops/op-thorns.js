@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-thorns.js — 棘刺 (char_293_thorns) 自选 operator kit: 6★ 领主 (近卫), an owned-6★ pick of
 // the tier-5 and tier-6 自选 slots; every skill, both talents, the trait and both modules (LOR-X, LOR-Δ) at every form.
 // Kit contract and the 自选 rules: ../README.md ("How to add an operator (自选)").
@@ -124,7 +125,7 @@ export default {
           if (!tgt.alive || !hasHp(tgt)) return;
           let amount = buff.data.base * (maxCnt > 1 ? buff.data.cnt : 1);
           let type = 'arts';
-          if (breakMul > 0 && tgt.findBuff('neuralBurst')) { amount *= breakMul; type = 'elemental'; }
+          if (breakMul > 0 && inElementBurst(battle, tgt, 'neural')) { amount *= breakMul; type = 'elemental'; }
           bt.dealDamage(unit, tgt, { amount, type, element: type === 'elemental' ? 'neural' : undefined, canDodge: false, tags: ['talent', 'dot', 'thorns:poison'] });
         },
       });

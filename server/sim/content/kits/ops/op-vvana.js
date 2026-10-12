@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-vvana.js — 薇薇安娜 (char_4098_vvana) 自选 operator kit: 6★ 术战者 (近卫), an owned-6★ pick
 // of the tier-5 and tier-6 自选 slots; every skill, both talents, the trait and both modules at every form.
 // Kit contract and the 自选 rules: ../README.md ("How to add an operator (自选)").
@@ -271,7 +272,7 @@ export default {
         if (er > 0) {
           battle.on('hit', (c) => {
             const t = c.target;
-            if (c.source !== unit || !t || t.side !== 'enemy' || tagged(c.dmg, AFTD_TAG) || !hasHp(t) || !t.findBuff('burnBurst')) return;
+            if (c.source !== unit || !t || t.side !== 'enemy' || tagged(c.dmg, AFTD_TAG) || !hasHp(t) || !inElementBurst(battle, t, 'burn')) return;
             battle.dealDamage(unit, t, { amount: unit.s.atk * er, type: 'elemental', element: 'burn', canDodge: false, tags: [AFTD_TAG, 'dot'] });
           }, { owner: unit, priority: OUTPUT_PRIORITY });
         }

@@ -1,3 +1,4 @@
+import { burstEventMatches } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-thumpy.js — 珊比 (char_4235_thumpy) 自选 operator kit: 6★ 本源铁卫 (重装), an owned-6★
 // pick of the tier-5 and tier-6 自选 slots; every skill, both talents, the trait and her module at every form.
 // Kit contract and the 自选 rules: ../README.md ("How to add an operator (自选)").
@@ -262,7 +263,7 @@ export default {
           }, { owner: unit, priority: 10 });
           battle.on('elementBurst', (c) => {
             const t = c.target;
-            if (c.element !== 'erosion' || !t || t.side !== 'enemy' || !up(unit) || !marks().has(t)) return;
+            if (!burstEventMatches(battle, c, 'erosion') || !t || t.side !== 'enemy' || !up(unit) || !marks().has(t)) return;
             if (def || atk) battle.addBuff(unit, { key: SOLE, refresh: 'stack', stacks: 1, maxStacks: cap, mods: nz({ defFlat: def, atkFlat: atk }), visible: true, tags: ['talent'] });
             if (shield > 0) {
               const max = capHp * unit.s.maxHp;
@@ -297,7 +298,7 @@ export default {
         if (breakDef) {
           battle.on('elementBurst', (c) => {
             const belt = unit.mem.thumpyBelt, t = c.target;
-            if (!belt || !up(unit) || c.element !== 'erosion' || !t || t.side !== 'enemy') return;
+            if (!belt || !up(unit) || !burstEventMatches(battle, c, 'erosion') || !t || t.side !== 'enemy') return;
             if (t.blockedBy !== unit && (t.isFlying || !bodyInKeys(t, belt.hurtSet))) return;
             battle.addBuff(t, { key: BELT_BREAK, refresh: 'stack', stacks: 1, maxStacks: 1e6, mods: { defFlat: breakDef }, source: unit });
           }, { owner: unit });

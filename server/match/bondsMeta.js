@@ -158,7 +158,8 @@ export function computeBonds(gd, ps) {
     const bond = gd.bond(id);
     const harmonyBonus = harmonyActive && bond.isCore && (onBoard.get(id)?.size ?? 0) >= 1 ? 1 : 0;
     const doorBonus = openDoor && !bond.isCore && !OPEN_DOOR_SKIP.has(id) && (onBoard.get(id)?.size ?? 0) >= 1 ? openDoor : 0;
-    const count = raw[id] + harmonyBonus + doorBonus + (id === augTop ? augBonus : 0);
+    // 元素 requires two distinct operators actually on the board, even with count-bonus augments.
+    const count = id === 'elementShip' ? (onBoard.get(id)?.size ?? 0) : raw[id] + harmonyBonus + doorBonus + (id === augTop ? augBonus : 0);
     let tier = tierFor(bond, count);
     if (id === DEPUTY_BOND && tier >= 1) {
       // upper tiers: operators differing in name OR elite state

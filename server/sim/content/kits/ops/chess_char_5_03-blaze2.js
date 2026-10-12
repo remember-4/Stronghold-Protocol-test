@@ -1,3 +1,4 @@
+import { inElementBurst, burstEventMatches } from '../../../elementState.js';
 // server/sim/content/kits/ops/chess_char_5_03-blaze2.js — 烛煌 (char_1040_blaze2) kit, tier 5.
 // Conventions of the tier-5 kits: ../shared/tier5.js; kit contract and rules: ../README.md.
 
@@ -108,7 +109,7 @@ export default {
       talents: [
         { install(battle, unit) { // 熔点引爆
           battle.on('elementBurst', (c) => {
-            if (c.element !== 'burn' || !on(unit) || c.target.side !== 'enemy') return;
+            if (!burstEventMatches(battle, c, 'burn') || !on(unit) || c.target.side !== 'enemy') return;
             elementHit(battle, unit, c.target, unit.s.atk * num(t0.ep_damage_scale), 'blazeMelt', 'burn');
             // 绝处重燃: "倒地期间…无法被治疗" — the meltdown heal does not reach her while downed
             if (!unit.mem.downed) battle.heal(unit, unit, unit.s.maxHp * num(t0.hp_ratio), { self: true });
@@ -151,12 +152,12 @@ export default {
         battle.on('hit', (c) => {
           const d = c.dmg, t = c.target;
           if (c.source !== unit || !d.isAttack || !d.isSkill || d.cancel) return;
-          if (t.side === 'enemy' && t.alive && t.findBuff('burnBurst')) elementHit(battle, unit, t, unit.s.atk * num(bb['attack@atk_scale']), 'blazeBurn', 'burn');
+          if (t.side === 'enemy' && t.alive && inElementBurst(battle, t, 'burn')) elementHit(battle, unit, t, unit.s.atk * num(bb['attack@atk_scale']), 'blazeBurn', 'burn');
         }, { owner: unit });
         const maxAmmo = num(bb['attack@trigger_time'], 18);
         battle.on('elementBurst', (c) => { // S3: burn bursts refill ammo, up to the skill's ammo
           const sk = unit.skill;
-          if (c.element !== 'burn' || !sk?.active || sk.kind !== 'ammo' || !on(unit)) return;
+          if (!burstEventMatches(battle, c, 'burn') || !sk?.active || sk.kind !== 'ammo' || !on(unit)) return;
           const n = Math.min(num(bb.ammo_recover), maxAmmo - sk.ammoLeft);
           if (n > 0) sk.addAmmo(n);
         }, { owner: unit });

@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-mantra.js — 真言 (char_4204_mantra) 自选 operator kit: 6★ 本源术师 (术师), an owned-6★ pick of
 // the tier-5 and tier-6 自选 slots; every skill, both talents, the trait and the module (PRI-X) at every form.
 // Kit contract and the 自选 rules: ../README.md ("How to add an operator (自选)").
@@ -81,7 +82,7 @@ const tileIn = (e, set) => set.has(Math.round(e.y) * COLS + Math.round(e.x));
 function riders(battle, unit, t, dealt, share, elemScale) {
   if (!t || t.side !== 'enemy') return;
   if (share > 0 && dealt > 0) elementDmg(battle, unit, t, 'neural', dealt * share, ['skill', 'mantra']);
-  if (elemScale > 0 && hasHp(t) && t.findBuff('neuralBurst')) {
+  if (elemScale > 0 && hasHp(t) && inElementBurst(battle, t, 'neural')) {
     battle.dealDamage(unit, t, { amount: unit.s.atk * elemScale, type: 'elemental', element: 'neural', canDodge: false, isSkill: true, tags: ['skill', 'mantra'] });
   }
 }

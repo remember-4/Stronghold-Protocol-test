@@ -1,3 +1,4 @@
+import { burstEventMatches } from '../../elementState.js';
 // server/sim/content/garrisons/battle.js — IN_BATTLE 特质 (garrisons) of the operators on the field.
 //
 // Each operator carries `unit.def.raw.garrisonIds` (elite chess carry the `_b` garrisons); the IN_BATTLE ones are
@@ -234,6 +235,8 @@ export function fireGain(battle, it) {
     cap: whole ? Infinity : it.cap, capKey: whole ? null : it.capKey,
   });
   if (whole && added > 0) it.wholeUsed = (it.wholeUsed ?? 0) + n;
+  // 塑心: one +2 grant for each successful original trigger, including a partial final grant at its old cap.
+  if (added > 0 && it.bb.extra_element_layers > 0) S.gainLayers(battle, { playerId: it.unit.ownerId, bonds: 'elementShip', n: it.bb.extra_element_layers, requireActive: false, source: it.unit, reason: 'garrison' });
   if (added > 0) S.fxOn(battle, 'garrison', it.unit, `gar:${it.gid}`, it.key, { n: added });
   return added;
 }
@@ -276,6 +279,44 @@ function ammoScope(it, u) {
 }
 
 const INSTALLERS = {
+  custom_element_clemnt(battle, list) {
+    battle.on('death', ({ unit: victim, reason }) => {
+      if (reason !== 'killed' || !S.isOp(victim) || victim.side !== 'ally' || !S.isMember(battle, victim, 'egirShip')) return;
+      for (const it of list) {
+        const u=it.unit;
+        if (u !== victim && !S.onField(u)) continue;
+        S.gainLayers(battle, { playerId:u.ownerId, bonds:['egirShip','elementShip'], n:1, requireActive:false, reason:'garrison', source:u });
+      }
+    }, { priority:20 });
+  },
+  custom_element_vvana(battle, list) {
+    for (const it of list) {
+      const u = it.unit;
+      battle.on('damaged', (c) => {
+        if (c.source !== u || c.type === 'element' || !c.dmg?.isAttack || c.target?.side !== 'enemy' || !c.target.alive || !(c.target.hp > 0)) return;
+        battle.dealDamage(u, c.target, { type: 'element', element: 'burn', amount: u.s.atk * it.bb.ep_damage_ratio, tags: ['garrison', 'element:vvan'] });
+      }, { owner: u });
+      battle.on('elementBurst', (c) => {
+        if (!S.onField(u) || c.target?.side !== 'enemy' || !burstEventMatches(battle, c, 'burn')) return;
+        S.gainLayers(battle, { playerId: u.ownerId, bonds: ['victoriaShip','elementShip'], n: it.bb.bond_add_count, source: u, reason: 'garrison', cap: it.cap, capKey: it.capKey });
+      }, { owner: u });
+    }
+  },
+  custom_element_wine(battle, list) {
+    for (const it of list) {
+      const u = it.unit;
+      const update = () => {
+        const steps = Math.floor(S.bondLayers(battle,u.ownerId,'elementShip') / 2) + Math.floor(S.bondLayers(battle,u.ownerId,'victoriaShip') / 2);
+        S.passiveBuff(battle,u,`gar:${it.gid}`,{ atkPct: steps * it.bb.atk_per_step });
+      };
+      update();battle.on('layerGain',(c)=>{if(c.playerId===u.ownerId&&['elementShip','victoriaShip'].includes(c.bondId))battle.after(0,update);});
+      battle.on('battleStart',update);
+      battle.on('hit',(c)=>{
+        if (c.credit !== u || c.dmg.type === 'element' || c.dmg.type === 'elemental') return;
+        c.dmg.type='elemental';c.dmg.canDodge=false;
+      },{owner:u,priority:1000});
+    }
+  },
   act1autochess_gar_event_useskill(battle, list) {
     const m = byUnit(list);
     battle.on('skillStart', ({ unit }) => {

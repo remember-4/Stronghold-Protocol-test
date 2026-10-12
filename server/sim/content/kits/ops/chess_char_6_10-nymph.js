@@ -1,3 +1,4 @@
+import { inElementBurst, effectiveBurstRemaining, burstEventMatches } from '../../../elementState.js';
 // server/sim/content/kits/ops/chess_char_6_10-nymph.js — 妮芙 (char_4146_nymph) kit, tier 6 (hidden).
 // Conventions of the tier-6 kits: ../shared/tier6.js; kit contract and rules: ../README.md.
 
@@ -10,15 +11,15 @@ import { num, tbb, live, elementDmg } from '../shared/tier6.js';
 function nymph(bb, chess, def) {
   const t0 = tbb(def, 0), t1 = tbb(def, 1), tb = def?.traitBb || {};
   const soul = (battle, unit, t, scale) => {
-    const burst = t.findBuff('apoptosisBurst');
-    if (!burst || !(scale > 0)) return;
+    const left = effectiveBurstRemaining(battle, t, 'apoptosis');
+    if (!(left > 0) || !(scale > 0)) return;
     const key = `nymph:soul:${unit.id}`;
     const cur = t.findBuff(key);
-    if (cur) { cur.data.scale = Math.max(cur.data.scale, scale); cur.timeLeft = Math.max(cur.timeLeft, burst.timeLeft); return; }
+    if (cur) { cur.data.scale = Math.max(cur.data.scale, scale); cur.timeLeft = Math.max(cur.timeLeft, left); return; }
     battle.addBuff(t, {
-      key, duration: Math.max(0.1, burst.timeLeft), interval: 1, source: unit, data: { scale },
+      key, duration: Math.max(0.1, left), interval: 1, source: unit, data: { scale },
       // 元素伤害 = the 'elemental' damage type (no DEF/RES, × elementalTakenMul)
-      onTick: ({ unit: e, buff }) => { if (e.findBuff('apoptosisBurst')) battle.dealDamage(unit, e, { amount: unit.s.atk * buff.data.scale, type: 'elemental', element: 'apoptosis', canDodge: false, tags: ['talent', 'elementDmg'] }); },
+      onTick: ({ unit: e, buff }) => { if (inElementBurst(battle, e, 'apoptosis')) battle.dealDamage(unit, e, { amount: unit.s.atk * buff.data.scale, type: 'elemental', element: 'apoptosis', canDodge: false, tags: ['talent', 'elementDmg'] }); },
     });
   };
   return {
@@ -48,8 +49,8 @@ function nymph(bb, chess, def) {
         const atk = num(t1.atk), max = Math.max(1, Math.floor(num(t1.max_stack_cnt, 10)));
         const fieldWide = t1.stack_cnt_check != null, as = num(t1.attack_speed);
         battle.on('deploy', ({ unit: u }) => { if (u === unit) unit.mem.nymphKey = 0; }, { owner: unit });
-        battle.on('elementBurst', ({ target, element }) => {
-          if (element !== 'apoptosis' || !live(unit) || !target || target.side !== 'enemy') return;
+        battle.on('elementBurst', ({ target, element, source }) => {
+          if (!burstEventMatches(battle, { target, element, source }, 'apoptosis') || !live(unit) || !target || target.side !== 'enemy') return;
           if (!fieldWide && !bodyInKeys(target, unit.rangeKeySet)) return;
           unit.mem.nymphKey = Math.min(max, (unit.mem.nymphKey || 0) + 1);
           const n = unit.mem.nymphKey;
@@ -58,7 +59,7 @@ function nymph(bb, chess, def) {
       } },
       { install(battle, unit) { // elite module: ×1.1 vs targets in an element burst
         const ds = num(tb.damage_scale, 1);
-        if (ds > 1) battle.on('hit', (ctx) => { if (ctx.source === unit && ctx.target.s.flags.burstLock) ctx.dmg.mul *= ds; }, { owner: unit });
+        if (ds > 1) battle.on('hit', (ctx) => { if (ctx.source === unit && inElementBurst(battle, ctx.target)) ctx.dmg.mul *= ds; }, { owner: unit });
       } },
     ],
   };

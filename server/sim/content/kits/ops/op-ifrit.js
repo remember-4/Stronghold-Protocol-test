@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-ifrit.js — 伊芙利特 (char_134_ifrit) 自选 operator kit: 6★ 轰击术师 (术师), an owned-6★ pick
 // of the tier-5 and tier-6 自选 slots; every skill, both talents, the trait and both modules at every form.
 // Kit contract and the 自选 rules: ../README.md ("How to add an operator (自选)").
@@ -162,7 +163,7 @@ export default {
           if (ex > 0) {
             battle.on('damaged', (c) => {
               const e = c.target, d = c.dmg;
-              if (c.source !== unit || !d || !(d.isAttack || d.tags?.includes(SCORCH_TAG)) || !e || e.side !== 'enemy' || !hasHp(e) || !e.findBuff('burnBurst')) return;
+              if (c.source !== unit || !d || !(d.isAttack || d.tags?.includes(SCORCH_TAG)) || !e || e.side !== 'enemy' || !hasHp(e) || !inElementBurst(battle, e, 'burn')) return;
               battle.dealDamage(unit, e, { amount: unit.s.atk * ex, type: 'elemental', element: 'burn', canDodge: false, tags: ['dot', 'module', 'ifrit:meltdown'] });
             }, { owner: unit });
           }

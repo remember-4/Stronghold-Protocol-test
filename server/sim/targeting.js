@@ -1,3 +1,4 @@
+import { inElementBurst } from './elementState.js';
 // server/sim/targeting.js — range tests, target filters and priorities (DESIGN §3, §5.5).
 //
 // Grid ranges: `[dRow, dCol]` offsets relative to facing RIGHT, rotated by the unit's direction (sim/dir.js: RIGHT
@@ -185,7 +186,7 @@ const PRIORITY_FNS = {
   boss: (e) => (e.isBoss ? 0 : 1),
   // "优先攻击精英或领袖敌人" (薇薇安娜 S3: kits/ops/op-vvana.js): an ELITE / BOSS rank enemy or a leader first
   elite: (e) => (e.isBoss || e.def?.rank === 'ELITE' || e.def?.rank === 'BOSS' ? 0 : 1),
-  notBurst: (e) => (e.s.flags.burstLock ? 1 : 0),
+  notBurst: (e, battle) => (inElementBurst(battle, e) ? 1 : 0),
   ground: (e) => (e.isFlying ? 1 : 0),
   // 攻城手 trait "优先攻击重量最重的敌人" (早露 / 提丰: kits/ops/op-poca.js, op-typhon.js): the highest current 重量等级
   // (Unit.weight: massLevel with 失重 etc.) first, the usual order after that
@@ -205,7 +206,7 @@ export function sortEnemyTargets(battle, attacker, cands, priority) {
   const keyed = cands.map((e) => ({
     e,
     b: e.blockedBy === attacker ? 0 : 1,
-    p: pf ? pf(e) : priority === 'nearest' ? bodyDist(e, ax, ay) : priority === 'farthest' ? -bodyDist(e, ax, ay) : 0,
+    p: pf ? pf(e, battle) : priority === 'nearest' ? bodyDist(e, ax, ay) : priority === 'farthest' ? -bodyDist(e, ax, ay) : 0,
     t: -(e.s.taunt || 0),
     d: battle.remainingDistance(e),
     s: e.spawnSeq,

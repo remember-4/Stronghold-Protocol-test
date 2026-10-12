@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/chess_char_6_03-yu.js — 余 (char_2026_yu) kit, tier 6.
 // Conventions of the tier-6 kits: ../shared/tier6.js; kit contract and rules: ../README.md.
 
@@ -144,7 +145,7 @@ function yu(bb, chess, def) {
         // "将第二天赋效果赋予全场所有干员": while S3 runs every operator of hers gets the ×1.14 too
         if (ds > 1) battle.on('hit', (ctx) => {
           const s = ctx.source;
-          if (!s || ctx.dmg.type !== 'arts' || !ctx.target || ctx.target.side !== 'enemy' || !ctx.target.findBuff('burnBurst')) return;
+          if (!s || ctx.dmg.type !== 'arts' || !ctx.target || ctx.target.side !== 'enemy' || !inElementBurst(battle, ctx.target, 'burn')) return;
           if (s !== unit && !(s.kind === 'op' && s.ownerId === unit.ownerId && live(unit) && s3On(unit))) return;
           if (opsOf(battle, unit.ownerId).length >= cnt) ctx.dmg.mul *= ds;
         }, { owner: unit });

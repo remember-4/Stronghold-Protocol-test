@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-ebnhlz.js — 黑键 (char_4046_ebnhlz) 自选 operator kit: 6★ 秘术师 (术师), an owned-6★ pick
 // of the tier-5 and tier-6 自选 slots; every skill, both talents, the trait, the three modules (MSC-X 源石骰子收纳盒, MSC-Y
 // “乐理阐释者”, MSC-Δ 朽坏传承) at every form, and the kit of his S2 summon 旧日残影 (token_10024_ebnhlz_rcube). Kit contract
@@ -190,7 +191,7 @@ export default {
       } else if (t2.splash > 0) {
         for (const e of others) battle.dealDamage(unit, e, { amount: atk * t2.splash, type: 'arts', isSplash: true, attackId, tags: ['talent', 'ebnhlz:yiyin'] });
       }
-      if (t2.elem > 0 && t.alive && t.findBuff('apoptosisBurst')) {
+      if (t2.elem > 0 && t.alive && inElementBurst(battle, t, 'apoptosis')) {
         battle.dealDamage(unit, t, { amount: atk * t2.elem, type: 'elemental', element: 'apoptosis', attackId, tags: ['talent', 'ebnhlz:yiyin'] });
       }
     }

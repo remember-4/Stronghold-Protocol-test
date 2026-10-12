@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/chess_char_6_09-cello.js — 塑心 (char_245_cello) kit, tier 6.
 // Conventions of the tier-6 kits: ../shared/tier6.js; kit contract and rules: ../README.md.
 
@@ -124,11 +125,11 @@ function cello(bb, chess, def) {
         if (elite > 1) onElementHit(battle, unit, (ctx) => (ctx.source === unit && ctx.target.side === 'enemy' && isElite(ctx.target) ? elite : 1));
         // "凋亡损伤爆发期间受到5%的元素脆弱" — the 元素脆弱 status (同名效果取最高)
         if (frag > 0) aura(battle, unit, 0.25, () => {
-          for (const e of enemiesIn(battle, unit)) if (e.findBuff('apoptosisBurst')) battle.applyStatus(e, 'elemFragile', { duration: 0.4, value: frag * boost(unit), source: unit });
+          for (const e of enemiesIn(battle, unit)) if (inElementBurst(battle, e, 'apoptosis')) battle.applyStatus(e, 'elemFragile', { duration: 0.4, value: frag * boost(unit), source: unit });
         });
         if (dot > 0) aura(battle, unit, dotIv, () => {
           for (const e of battle.enemies) {
-            if (e.alive && !e.hidden && e.findBuff('apoptosisBurst')) battle.dealDamage(unit, e, { amount: dot * boost(unit), type: 'elemental', element: 'apoptosis', canDodge: false, tags: ['talent', 'elementDmg'] });
+            if (e.alive && !e.hidden && inElementBurst(battle, e, 'apoptosis')) battle.dealDamage(unit, e, { amount: dot * boost(unit), type: 'elemental', element: 'apoptosis', canDodge: false, tags: ['talent', 'elementDmg'] });
           }
         });
         // module 音乐家的旅程 trait: "攻击范围内敌人受到10%的元素脆弱"

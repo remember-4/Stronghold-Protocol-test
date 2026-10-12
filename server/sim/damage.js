@@ -1,3 +1,4 @@
+import { elementBondPolicy, recordAlliedBurst } from './elementState.js';
 // server/sim/damage.js — damage & heal pipeline, shields, dodge, element gauges (DESIGN §5.5).
 //
 // dealDamage order: (element → gauge path) | invulnerable? / 对地规避 (a ground enemy's damage to an airborne 起飞 ally —
@@ -290,6 +291,7 @@ export function dealDamage(battle, source, target, dmgIn) {
   let mul = dmg.mul * (type === 'elemental' ? 1 : ts.dmgTakenMul);
   if (ss) mul *= ss.dmgDealtMul * (type === 'phys' ? ss.physDealtMul : type === 'arts' ? ss.artsDealtMul : 1);
   mul *= type === 'phys' ? ts.physTakenMul : type === 'arts' ? ts.artsTakenMul : type === 'elemental' ? ts.elementalTakenMul : ts.trueTakenMul;
+  if (type === 'elemental' && source?.side === 'ally' && target.side === 'enemy') mul *= elementBondPolicy(battle).multiplier;
   final *= mul;
   if (!(final > 0) || !Number.isFinite(final)) final = 0;
   // A6000 fork: the 海克斯' multipliers (the source's augDealtMul, the target's augTakenMul, the instance's augMul) — 限伤保护
@@ -467,6 +469,7 @@ function resolveBurst(battle, source, target, el) {
   target.elem[el] = target.gaugeMax;
   // the cooldown's end restores every element of the unit ("随后单位所有种类的元素值恢复至最大值")
   const reset = () => { for (const k of ELEMENT_ORDER) if (k in target.elem) target.elem[k] = 0; };
+  recordAlliedBurst(source, target, el);
   battle.fx('burst', { x: target.x, y: target.y, id: target.id, element: el });
   if (battle._hooks.elementBurst) battle.emit('elementBurst', { source, target, element: el });
   if (!target.alive) { reset(); return; }

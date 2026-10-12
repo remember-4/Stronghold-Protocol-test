@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-logos.js — 逻各斯 (char_4133_logos) 自选 operator kit: 6★ 中坚术师 (术师), an owned-6★ pick
 // of the tier-5 and tier-6 自选 slots; every skill, both talents, the trait and both modules (CCR-Δ, CCR-Y) at every form.
 // Kit contract and the 自选 rules: ../README.md ("How to add an operator (自选)").
@@ -125,7 +126,7 @@ export default {
         battle.fx('logosLexicon', { x: t.x, y: t.y, id: unit.id, target: t.id });
         battle.dealDamage(unit, t, { amount: unit.s.atk * lex.scale, type: 'arts', tags: ['talent', 'logosLexicon'] });
         if (t.alive && lex.sluggish > 0) battle.applyStatus(t, 'sluggish', { duration: lex.sluggish, source: unit });
-        if (lex.elemScale > 0 && hasHp(t) && t.findBuff('apoptosisBurst')) {
+        if (lex.elemScale > 0 && hasHp(t) && inElementBurst(battle, t, 'apoptosis')) {
           battle.dealDamage(unit, t, { amount: unit.s.atk * lex.elemScale, type: 'elemental', element: 'apoptosis', canDodge: false, tags: ['talent', 'logosLexicon'] });
         }
       }

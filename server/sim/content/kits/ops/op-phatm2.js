@@ -1,3 +1,4 @@
+import { inElementBurst, burstEventMatches } from '../../../elementState.js';
 // server/sim/content/kits/ops/op-phatm2.js — 酒神 (char_1042_phatm2) 自选 operator kit: 6★ 巫役 (辅助), an owned-6★ pick of the
 // tier-5 and tier-6 自选 slots; every skill, both talents, the trait, her module (RIT-X 酒神之心) at every form, and the kits of
 // her summons 本能的召唤 (token_10054_phatm2_encdool) and 迷狂牢笼 (token_10055_phatm2_mndclv). Kit contract and the 自选
@@ -286,9 +287,9 @@ export default {
           onStart({ battle, unit }) {
             for (const c of cagesOf(battle, unit)) c.mem.cageUntil = null;   // phatm2_s_3[token_clear_cooldown]
             for (const e of [...battle.enemies]) {
-              if (!e.alive || e.hidden || !e.s.flags.burstLock || !bodyInKeys(e, unit.rangeKeySet)) continue;
+              if (!e.alive || e.hidden || !inElementBurst(battle, e) || !bodyInKeys(e, unit.rangeKeySet)) continue;
               splash(battle, unit, e, splashR);
-              if (e.alive && e.findBuff('neuralBurst')) cageAt(battle, unit, e, false);
+              if (e.alive && inElementBurst(battle, e, 'neural')) cageAt(battle, unit, e, false);
             }
           },
           onTick({ battle, unit, dt }) {
@@ -320,9 +321,9 @@ export default {
             const slow = (e) => battle.applyStrongest(e, DREAM, { duration: HOLD, value: dreamAspd, mods: (v) => ({ aspd: -v }), source: unit });
             battle.every(IV, () => {
               if (!up(unit)) return;
-              for (const e of battle.enemies) if (e.alive && !e.hidden && e.findBuff('neuralBurst')) slow(e);
+              for (const e of battle.enemies) if (e.alive && !e.hidden && inElementBurst(battle, e, 'neural')) slow(e);
             }, { owner: unit, immediate: true });
-            battle.on('elementBurst', (c) => { if (up(unit) && c.element === 'neural' && c.target && c.target.side === 'enemy' && c.target.alive) slow(c.target); }, { owner: unit });
+            battle.on('elementBurst', (c) => { if (up(unit) && burstEventMatches(battle, c, 'neural') && c.target && c.target.side === 'enemy' && c.target.alive) slow(c.target); }, { owner: unit });
           }
           if (dreamValue > 0) {
             battle.on('enemyAttackStart', (c) => {
@@ -377,7 +378,7 @@ export default {
         }, { owner: unit });
         battle.on('elementBurst', (c) => {
           const e = c.target;
-          if (c.element !== 'neural' || !skillOn(unit, S3) || !up(unit) || !e || e.side !== 'enemy' || !e.alive || !bodyInKeys(e, unit.rangeKeySet)) return;
+          if (!burstEventMatches(battle, c, 'neural') || !skillOn(unit, S3) || !up(unit) || !e || e.side !== 'enemy' || !e.alive || !bodyInKeys(e, unit.rangeKeySet)) return;
           cageAt(battle, unit, e, true);
         }, { owner: unit });
       },

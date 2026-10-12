@@ -1,3 +1,4 @@
+import { inElementBurst, effectiveBurstRemaining, burstEventMatches } from '../../../elementState.js';
 // server/sim/content/kits/ops/chess_char_5_22-nymph.js — 妮芙 (char_4146_nymph) kit, tier 5.
 // Conventions of the tier-5 kits: ../shared/tier5.js; kit contract and rules: ../README.md.
 
@@ -22,15 +23,15 @@ export default {
     const sid = selectedId(chess, def);
     const ep = num(bb.ep_damage_ratio, num(bb['attack@ep_damage_ratio'])), skillSoul = num(bb.element_atk_scale), soulBase = num(t0.element_atk_scale);
     const soul = (battle, unit, e, scale) => {
-      const burst = e.findBuff('apoptosisBurst');
-      if (!burst || !(scale > 0)) return;
+      const left = effectiveBurstRemaining(battle, e, 'apoptosis');
+      if (!(left > 0) || !(scale > 0)) return;
       const key = `nymph:soul:${unit.id}`;
       const cur = e.findBuff(key);
-      if (cur) { cur.data.scale = Math.max(num(cur.data.scale), scale); return; }
+      if (cur) { cur.timeLeft = Math.max(cur.timeLeft, left); cur.data.scale = Math.max(num(cur.data.scale), scale); return; }
       battle.addBuff(e, {
-        key, duration: Math.max(0.1, burst.timeLeft), interval: 1, data: { scale },
+        key, duration: Math.max(0.1, left), interval: 1, data: { scale },
         onTick: ({ unit: x, buff }) => {
-          if (!x.findBuff('apoptosisBurst')) { battle.removeBuff(x, buff); return; }
+          if (!inElementBurst(battle, x, 'apoptosis')) { battle.removeBuff(x, buff); return; }
           elementHit(battle, unit, x, unit.s.atk * num(buff.data.scale), 'nymphSoul', 'apoptosis');
         },
       });
@@ -70,7 +71,7 @@ export default {
         } },
         { install(battle, unit) { // 窥心钥
           battle.on('elementBurst', (c) => {
-            if (c.element !== 'apoptosis' || c.target.side !== 'enemy' || !on(unit) || !inRange(unit, c.target)) return;
+            if (!burstEventMatches(battle, c, 'apoptosis') || c.target.side !== 'enemy' || !on(unit) || !inRange(unit, c.target)) return;
             battle.addBuff(unit, { key: 'nymph:key', refresh: 'stack', maxStacks: Math.max(1, num(t1.max_stack_cnt, 10)), mods: { atkPct: num(t1.atk) } });
           }, { owner: unit });
         } },
@@ -83,13 +84,13 @@ export default {
           battle.on('damaged', (c) => {
             if (c.source !== unit || !unit.skill?.active || !c.dmg?.isAttack || c.type === 'element' || c.type === 'elemental') return;
             const e = c.target;
-            if (e.side !== 'enemy' || !e.alive || !e.findBuff('apoptosisBurst') || !(extra > 0)) return;
+            if (e.side !== 'enemy' || !e.alive || !inElementBurst(battle, e, 'apoptosis') || !(extra > 0)) return;
             elementHit(battle, unit, e, unit.s.atk * extra, 'nymphLash', 'apoptosis');
           }, { owner: unit });
         }
         if (sid === 'skchr_nymph_3') { // S3: attacks on a burst target become elemental damage
           battle.on('hit', (c) => {
-            if (c.source !== unit || !unit.skill?.active || !c.dmg.isAttack || !c.target || !c.target.findBuff('apoptosisBurst')) return;
+            if (c.source !== unit || !unit.skill?.active || !c.dmg.isAttack || !c.target || !inElementBurst(battle, c.target, 'apoptosis')) return;
             if (c.dmg.type !== 'arts' && c.dmg.type !== 'phys') return;
             c.dmg.type = 'elemental';
             c.dmg.element = 'apoptosis';

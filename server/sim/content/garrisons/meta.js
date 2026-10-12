@@ -136,7 +136,11 @@ H.SERVER_ADD_BOND_METHOD = {
     switch (bbStr.add_method) {
       case 'shoplv': addAll(ctx, bonds, ctx.shopLevel() * multi, ra); break;
       case 'round_gain_char': addAll(ctx, bonds, (ctx.roundStats().gainedChess | 0) * multi, ra); break;
-      case 'hand_count': addAll(ctx, bonds, ctx.hand().filter((p) => p && p.kind === 'chess').length * multi, ra); break;
+      case 'hand_count': {
+        const added = addAll(ctx, bonds, ctx.hand().filter((p) => p && p.kind === 'chess').length * multi, ra);
+        if (bb.element_ratio > 0 && bonds.length === 1 && bonds[0] === 'swiftShip' && added > 0) addAll(ctx, ['elementShip'], Math.floor(added * bb.element_ratio), false);
+        break;
+      }
       case 'same_row': addAll(ctx, bonds, sameRowCount(ctx, me) * multi, ra); break;
       case 'same_bond_diff_lv':
         for (const b of bonds) addAll(ctx, [b], distinctTiers(ctx, (p) => metaBonds(ctx, p).includes(b)).size * multi, ra);

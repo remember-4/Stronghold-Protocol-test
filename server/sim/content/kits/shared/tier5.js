@@ -1,3 +1,4 @@
+import { inElementBurst } from '../../../elementState.js';
 // server/sim/content/kits/shared/tier5.js — helpers and notes of the hand-authored kits for every tier-5 chess (DESIGN
 // §7, docs/SIM.md §7.2; formerly tier5.js — the kits live one per file in ../ops/).
 //
@@ -106,7 +107,7 @@ function crowdAspd(battle, unit, key, aspd, cnt) {
 function burstSpUp(battle, unit, key, sp) {
   if (!(sp > 0)) return;
   whileOn(battle, unit, AURA_IV, () => {
-    if (battle.enemiesInKeys(unit.rangeKeys, unit, { canHitFly: true }).some((e) => e.s.flags.burstLock)) battle.addBuff(unit, { key, duration: AURA_DUR, mods: { spRecoveryFlat: sp } });
+    if (battle.enemiesInKeys(unit.rangeKeys, unit, { canHitFly: true }).some((e) => inElementBurst(battle, e))) battle.addBuff(unit, { key, duration: AURA_DUR, mods: { spRecoveryFlat: sp } });
   });
 }
 
@@ -146,7 +147,7 @@ function burstDamageUp(battle, unit, mul) {
   if (!(mul > 1)) return;
   battle.on('hit', (c) => {
     if (c.source !== unit || !c.target || c.target.side !== 'enemy' || c.dmg.type === 'element') return;
-    if (c.target.s.flags.burstLock) c.dmg.mul *= mul;
+    if (inElementBurst(battle, c.target)) c.dmg.mul *= mul;
   }, { owner: unit });
 }
 
