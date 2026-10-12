@@ -7,6 +7,14 @@ import { createStore, loadPref, savePref } from './store.js';
 
 const stored = loadPref('skins', {});
 export const skinStore = createStore({ choices: stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {} });
+/** Reset outfits once after a newly deployed build, then preserve manual picks on refresh. */
+export function syncSkinDeployment(build) {
+  if (!build || loadPref('skinsRevision', '') === build) return false;
+  savePref('skins', {});
+  savePref('skinsRevision', build);
+  skinStore.set({ choices: {} });
+  return true;
+}
 const baseId = (id) => typeof id === 'string' ? id.replace(/_(1|2)$/, '') : '';
 
 export function skinOptions(manifest, id) {
@@ -19,7 +27,8 @@ export function skinOptions(manifest, id) {
 
 export function selectedSkin(manifest, id, choices = skinStore.get().choices) {
   const skinId = choices?.[baseId(id)];
-  return skinId ? skinOptions(manifest, id).find((s) => s.id === skinId) || null : null;
+  const options = skinOptions(manifest, id);
+  return skinId === '__original__' ? null : skinId ? options.find((s) => s.id === skinId) || options.at(-1) || null : options.at(-1) || null;
 }
 
 export function setSkin(manifest, id, skinId) {
@@ -27,7 +36,7 @@ export function setSkin(manifest, id, skinId) {
   if (!manifest?.chars?.[charId] || (skinId && !skinOptions(manifest, charId).some((s) => s.id === skinId))) return false;
   const choices = { ...skinStore.get().choices };
   if (skinId) choices[charId] = skinId;
-  else delete choices[charId];
+  else choices[charId] = '__original__';
   savePref('skins', choices);
   skinStore.set({ choices });
   return true;

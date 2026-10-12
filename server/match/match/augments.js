@@ -18,7 +18,7 @@
 
 import { PHASE, ERR } from '../../../shared/constants.js';
 import {
-  AUGMENT_OFFERS, AUGMENT_SECONDS, VOTE_SECONDS, EXCLUSIVE_ROUNDS, augmentDef, augmentTierAt, isVoteRound, rollAugments, rollRarity,
+  AUGMENT_OFFERS, AUGMENT_SECONDS, VOTE_SECONDS, EXCLUSIVE_ROUNDS, augmentDef, augmentTierAt, rollAugments, rollRarity,
   AUG5_BOT,
 } from '../../../shared/augments.js';
 import { msg, dn, tn, format } from '../../../shared/i18n.js';
@@ -74,9 +74,7 @@ export class MatchAugments {
   /** Whether the round that just started has an augment pick or an enemy vote. */
   augmentRound(round = this.round) {
     if (!this.augmentsOn) return false;
-    if (round === this.gd.bossRound || round === this.gd.hiddenRound) return false;
-    // the vote: unless the room switched the enemy upgrades off (match/enemyVotes.js enemyVoteRound)
-    return augmentTierAt(round) > 0 || (isVoteRound(round) && this.enemyVoteRound(round));
+    return this._ebState().settings.playerRounds.includes(round) || this.enemyVoteRound(round);
   }
 
   /**
@@ -160,8 +158,8 @@ export class MatchAugments {
 
   enterAugment() {
     const alive = this.alivePlayers();
-    const tier = augmentTierAt(this.round);
-    const vote = isVoteRound(this.round) && this.enemyVoteRound(this.round);
+    const tier = this._ebState().settings.playerRounds.includes(this.round) ? augmentTierAt(this.round) || 3 : 0;
+    const vote = this.enemyVoteRound(this.round);
     if (!alive.length || (!tier && !vote)) { this.afterAugment(); return; }
     this.phase = PHASE.AUGMENT;
     const a = { round: this.round, tier, offers: {}, picks: {}, rarity: {}, extra: {}, vote: null, untimed: this.soloUntimed };
@@ -191,7 +189,7 @@ export class MatchAugments {
    * (`ps.augRarityShift`), 加购 deals more generic cards (`ps.augExtraOffers`); without them nothing draws differently.
    */
   _augmentOffersFor(ps, tier) {
-    let rarity = rollRarity(this.round, this.rngAug, ps.augRarities ?? []);
+    let rarity = rollRarity(Math.min(this.round, 13), this.rngAug, ps.augRarities ?? []);
     if (ps.augRarityShift) {
       rarity = Math.max(1, Math.min(6, rarity + Math.trunc(Number(ps.augRarityShift) || 0)));
       ps.augRarityShift = 0;

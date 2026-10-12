@@ -174,7 +174,11 @@ export const isBossVoteRound = (round, bossRound) => isVoteRound(round) && Numbe
 /** Tier weights are whole numbers 0–EB_WEIGHT_MAX (at least one above 0). */
 export const EB_WEIGHT_MAX = 100;
 /** The defaults: votes on, 白银 60 / 黄金 30 / 彩色 10, no 彩色 on the first vote (round 4). */
-export const EB_SETTINGS_DEFAULT = Object.freeze({ on: true, weights: Object.freeze([60, 30, 10]), firstNoPrism: true });
+export const CONFIGURABLE_ROUNDS = Object.freeze(Array.from({ length: 15 }, (_, i) => i + 1));
+export const EB_SETTINGS_DEFAULT = Object.freeze({ on: true, weights: Object.freeze([60, 30, 10]), firstNoPrism: true,
+  playerRounds: Object.freeze(CONFIGURABLE_ROUNDS.slice(0, 13)), enemyRounds: VOTE_ROUNDS });
+const isRounds = (v) => Array.isArray(v) && v.every((r) => Number.isInteger(r) && CONFIGURABLE_ROUNDS.includes(r)) && new Set(v).size === v.length;
+const rounds = (v, fallback) => Object.freeze((isRounds(v) ? v : fallback).slice().sort((a, b) => a - b));
 
 const isWeight = (v) => Number.isInteger(v) && v >= 0 && v <= EB_WEIGHT_MAX;
 const isWeights = (w) => Array.isArray(w) && w.length === EB_TIERS.length && w.every(isWeight) && w.reduce((a, b) => a + b, 0) > 0;
@@ -189,6 +193,8 @@ export function isEnemyBuffSettings(v) {
   if (v.on !== undefined && typeof v.on !== 'boolean') return false;
   if (v.firstNoPrism !== undefined && typeof v.firstNoPrism !== 'boolean') return false;
   if (v.weights !== undefined && !isWeights(v.weights)) return false;
+  if (v.playerRounds !== undefined && !isRounds(v.playerRounds)) return false;
+  if (v.enemyRounds !== undefined && !isRounds(v.enemyRounds)) return false;
   return true;
 }
 
@@ -199,6 +205,8 @@ export function enemyBuffSettings(v) {
   return Object.freeze({
     on: typeof o.on === 'boolean' ? o.on : d.on,
     weights: Object.freeze(isWeights(o.weights) ? o.weights.slice() : d.weights.slice()),
+    playerRounds: rounds(o.playerRounds, d.playerRounds),
+    enemyRounds: rounds(o.enemyRounds, d.enemyRounds),
     firstNoPrism: typeof o.firstNoPrism === 'boolean' ? o.firstNoPrism : d.firstNoPrism,
   });
 }
@@ -206,7 +214,7 @@ export function enemyBuffSettings(v) {
 /** Whether two settings objects mean the same (after the defaults). */
 export function sameEnemyBuffSettings(a, b) {
   const x = enemyBuffSettings(a), y = enemyBuffSettings(b);
-  return x.on === y.on && x.firstNoPrism === y.firstNoPrism && x.weights.every((w, i) => w === y.weights[i]);
+  return x.on === y.on && x.firstNoPrism === y.firstNoPrism && x.weights.every((w, i) => w === y.weights[i]) && ['playerRounds', 'enemyRounds'].every((k) => x[k].length === y[k].length && x[k].every((r, i) => r === y[k][i]));
 }
 
 // ---------------------------------------------------------------------------------------------------------------

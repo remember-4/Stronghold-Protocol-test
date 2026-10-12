@@ -53,7 +53,8 @@ import { GuideHost } from './ui/guide.js';
 import { installDeviceSupport } from './ui/device.js';
 import { LoadoutHost } from './screens/loadout.js';
 import { installLoadoutSync, installOwnershipSync, installDiySync } from './ui/loadoutSync.js';
-import { startBuildGuard } from './ui/buildGuard.js';
+import { syncSkinDeployment } from './skins.js';
+import { fetchBuild, startBuildGuard } from './ui/buildGuard.js';
 import { initLang, useLang, tickerText } from './ui/lang.js';
 import { sanitizeTeamFx, pushTeamFx } from './ui/teamFx.js';
 import { t, N_, translateWire } from '../../shared/i18n.js';
@@ -370,7 +371,7 @@ async function boot() {
   });
   // the language (and its UI translations) before the first render: no Chinese flash for an English player
   const langReady = initLang().catch((err) => console.warn('[app] language setup failed', err));
-  await Promise.all([waitForFonts(1200), connectWhenReady, langReady]);
+  await Promise.all([waitForFonts(1200), connectWhenReady, langReady, fetchBuild(globalThis.fetch.bind(globalThis)).then(syncSkinDeployment)]);
   const root = document.getElementById('app');
   render(html`<${App} />`, root);
 

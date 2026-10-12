@@ -210,7 +210,7 @@ export class Room {
       mode: this.mode,
       difficulty: this.difficulty,
       // A6000 fork: the 敌人强化 settings (a plain copy)
-      enemyBuffs: { on: this.enemyBuffs.on, weights: this.enemyBuffs.weights.slice(), firstNoPrism: this.enemyBuffs.firstNoPrism },
+      enemyBuffs: { on: this.enemyBuffs.on, weights: this.enemyBuffs.weights.slice(), firstNoPrism: this.enemyBuffs.firstNoPrism, playerRounds: this.enemyBuffs.playerRounds.slice(), enemyRounds: this.enemyBuffs.enemyRounds.slice() },
       inMatch: !!this.match,
       seats: this.seats.map((s) => (s
         ? { seat: s.seat, playerId: s.playerId, name: s.name, isBot: s.isBot, ready: s.ready, connected: s.connected && !s.left }

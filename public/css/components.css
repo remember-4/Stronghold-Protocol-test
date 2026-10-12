@@ -1052,3 +1052,6 @@
   --bk-c: var(--red-premium);
 }
 .crash__box h2 { font-size: .3rem; }
+
+.ebset__schedule{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.1rem;align-items:center;text-align:center;max-height:3.8rem;overflow:auto;padding:.12rem;border:1px solid var(--line,#555)}
+.ebset__schedule input{justify-self:center;width:20px;height:20px;accent-color:#49bdaa}.ebset__presets{display:flex;flex-wrap:wrap;gap:.08rem;margin:.12rem 0}

@@ -34,7 +34,7 @@
 
 import { PHASE, ERR } from '../../../shared/constants.js';
 import {
-  VOTE_ROUNDS, enemyBuffDef, enemyBuffCounts, enemyBuffSettings, isBossVoteRound, isVoteRound, rollVoteOptions, rollVoteTier,
+  enemyBuffDef, enemyBuffCounts, enemyBuffSettings, rollVoteOptions, rollVoteTier,
   tallyVote, tempBuffPool, layerTaxKeep,
 } from '../../../shared/enemyBuffs.js';
 import { msg, dn } from '../../../shared/i18n.js';
@@ -203,7 +203,8 @@ export class MatchEnemyVotes {
 
   /** Whether `round` has an enemy upgrade vote: a vote round, and the room did not switch the votes off. */
   enemyVoteRound(round = this.round) {
-    return isVoteRound(round) && this._ebState().settings.on;
+    const s = this._ebState().settings;
+    return s.on && s.enemyRounds.includes(round);
   }
 
   /**
@@ -230,8 +231,8 @@ export class MatchEnemyVotes {
   /** The vote of this round: { options, votes, tier, boss, reverse } (the AUGMENT phase's `aug.vote`). */
   rollEnemyVote() {
     const st = this._ebState();
-    const boss = isBossVoteRound(this.round, this.gd.bossRound);
-    const tier = rollVoteTier(st.settings.weights, this.rngAug, { noPrism: st.settings.firstNoPrism && this.round === VOTE_ROUNDS[0] });
+    const boss = this.round >= this.gd.bossRound - 1;
+    const tier = rollVoteTier(st.settings.weights, this.rngAug, { noPrism: st.settings.firstNoPrism && this.round === st.settings.enemyRounds[0] });
     const options = rollVoteOptions(this.enemyBuffs, this.rngAug, { tier, boss, allowed: (d) => this.enemyBuffAvailable(d) });
     return { options, votes: {}, tier, boss, reverse: st.reverse > 0 };
   }

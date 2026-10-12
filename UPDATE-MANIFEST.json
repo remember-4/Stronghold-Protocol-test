@@ -1,0 +1,23 @@
+{
+  "baseCommit": "a0e3100d363ca36c141c4bf5adbfc9565b111b87",
+  "files": {
+    "data/backups.json": "75e8630b90e3fa6be082828d0598a2a96f5691d7ec367c7aded7274bfed4d0b8",
+    "data/chess.json": "28217c2863cd77ec67c46dc8b3e734074876e165db7dc668e9a1c5dcc5dca58f",
+    "docs/updates/hex-schedule-20261012.md": "770cc75b6f139d70352735dd75e4834a529d4a6aad414f9d3a6609028ccad99d",
+    "public/css/components.css": "d764a64545aacf550c026b83f2e41e1c588a31739a99e1b8c3425d3329d45f37",
+    "public/i18n/en.json": "459f455f0478bba86d4d04ea26833c2cce40955eca5e7fca0620b41196227885",
+    "public/i18n/ja.json": "ddc422c44304bf6d91a44831ea42d9e9171f5a6bb2d1758d4af9ecac2d52b4ad",
+    "public/i18n/ko.json": "5047ad7159f19a9448a56cfaf888ceca8dc786b3f7f5151825e0a474fdeefafa",
+    "public/i18n/zh-TW.json": "c8ec669f424493a05cd413860986d91e9f6cb055743275646cf15e190b718b35",
+    "public/js/main.js": "9930400257fd2c7624e692291bb424103a87f812b9a5752d298074b61bf0a5d0",
+    "public/js/screens/lobby.js": "134f99e2e26572ca9b443e2a7b44777a54b34f30fd21dbc4e2ceef04afda3d00",
+    "public/js/skins.js": "db77d457bbe4a7ffa097a02b2e32a5217f9bc18ac60be473a8fdcd5dd20e1a98",
+    "public/js/ui/enemyBuffSettings.js": "4777a1b42778d84ce84cb7b320fea1ecfe8ba87e9734c7cdaec519fc49aab45e",
+    "server/lobby.js": "3ac83134a0b1610f7b81321f773546bf7c3b808413bf153c312296ae6d6e2a4d",
+    "server/match/match/augments.js": "0764af9116c2895003f98a4e2a56316a8eaadbec1e2b0b296e701e7da9d8e40e",
+    "server/match/match/enemyVotes.js": "64a5f5860b270ac6bc0caecfb12ddc58822bb570b7c7e9b4c6240f562b379d63",
+    "shared/enemyBuffs.js": "357094e70bd036f10d4e54a20e4a535c107dd3ed4101ab379bf68ecd7c5ddcbd",
+    "test/hex-schedule.test.js": "88c435f6bd2d65ee1082e9230d425f01a765f18cbfb9ce073485a83539a606d7",
+    "tools/custom/threye-unit.json": "f879a4ce3e709ed917f96fd24006503427d7a8ff722a3929aad48e6d70dd3637"
+  }
+}

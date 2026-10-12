@@ -2314,5 +2314,18 @@
   "领袖第一次降到 {hpPct}% 生命时，回复共享血池的 {pct}%（每场一次）": "The first time a leader drops to {hpPct}% HP, it restores {pct}% of the shared pool (once a fight)",
   "首领·复苏：领袖回复了共享血池的 {pct}%": "Leader · Revival: the leader restored {pct}% of the shared pool",
   "资金下限": "Funds floor",
-  "待偿还": "Debt due"
+  "待偿还": "Debt due",
+  "海克斯与敌方强化": "Augments and enemy upgrades",
+  "我方海克斯": "Player augments",
+  "敌方强化": "Enemy upgrades",
+  "默认安排": "Default schedule",
+  "每回合双方": "Both every round",
+  "仅我方": "Players only",
+  "全部关闭": "Disable all",
+  "每回合强化安排": "Upgrade schedule",
+  "首次敌方强化不出彩色": "No prismatic upgrade on the first enemy vote",
+  "第 {r} 回合我方海克斯": "Round {r}: player augments",
+  "第 {r} 回合敌方强化": "Round {r}: enemy upgrades",
+  "逐回合选择是否新增强化；关闭某回合不会移除之前获得的强化。第14、15回合仅在进入对应战斗时生效。": "Choose new upgrades for each round. Disabling a round keeps earlier upgrades. Rounds 14–15 apply only if reached.",
+  "关闭后不再新增敌方强化，我方海克斯按回合设置执行": "No new enemy upgrades while disabled; player augments follow the schedule."
 }

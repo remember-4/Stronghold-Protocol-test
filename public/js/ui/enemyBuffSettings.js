@@ -8,7 +8,7 @@
 import { useState } from '../../vendor/hooks.module.js';
 import { html, Button, Icon, MicroLabel, Modal } from './components.js';
 import { t, tc } from '../../../shared/i18n.js';
-import { EB_TIERS, EB_TIER_NAME, EB_WEIGHT_MAX, VOTE_ROUNDS, enemyBuffSettings } from '../../../shared/enemyBuffs.js';
+import { EB_TIERS, EB_TIER_NAME, EB_WEIGHT_MAX, CONFIGURABLE_ROUNDS, EB_SETTINGS_DEFAULT, enemyBuffSettings } from '../../../shared/enemyBuffs.js';
 
 const cx = (...p) => p.flat().filter(Boolean).join(' ');
 
@@ -36,7 +36,7 @@ export function enemyBuffSummary(settings) {
   const s = enemyBuffSettings(settings);
   if (!s.on) return t('关闭');
   const line = tierChances(s).map((p, i) => `${t(EB_TIER_NAME[EB_TIERS[i]])} ${p}%`).join(' · ');
-  return s.firstNoPrism ? t('{line}（第 {r} 回合不出彩色）', { line, r: VOTE_ROUNDS[0] }) : line;
+  return s.firstNoPrism ? t('{line}（第 {r} 回合不出彩色）', { line, r: s.enemyRounds[0] ?? 2 }) : line;
 }
 
 function Toggle({ value, onChange, disabled, label }) {
@@ -50,7 +50,7 @@ function Toggle({ value, onChange, disabled, label }) {
  */
 export function EnemyBuffEditor({ value, onChange, disabled = false }) {
   const s = enemyBuffSettings(value);
-  const set = (patch) => onChange({ on: s.on, weights: s.weights.slice(), firstNoPrism: s.firstNoPrism, ...patch });
+  const set = (patch) => onChange({ ...s, ...patch });
   const setWeight = (i, v) => {
     const w = s.weights.slice();
     w[i] = Math.max(0, Math.min(EB_WEIGHT_MAX, Math.round(Number(v) || 0)));
@@ -66,7 +66,22 @@ export function EnemyBuffEditor({ value, onChange, disabled = false }) {
       <span class="ebset__label"><${Icon} name="sword" />${t('敌人强化')}<${MicroLabel}>ENEMY UPGRADES<//></span>
       <${Toggle} value=${s.on} disabled=${disabled} label=${t('敌人强化')} onChange=${(on) => set({ on })} />
     </div>
-    <p class="ebset__note">${t('第 {rounds} 回合全队投票，所有敌人从此获得投中的强化。每次投票先按下面的权重抽一个品质，三个选项都是这个品质。', { rounds: VOTE_ROUNDS.join('、') })}</p>
+    <p class="ebset__note">${t('第 {rounds} 回合全队投票，所有敌人从此获得投中的强化。每次投票先按下面的权重抽一个品质，三个选项都是这个品质。', { rounds: s.enemyRounds.join('、') || '—' })}</p>
+    <p class="ebset__note">${t('逐回合选择是否新增强化；关闭某回合不会移除之前获得的强化。第14、15回合仅在进入对应战斗时生效。')}</p>
+    <div class="ebset__presets">
+      ${[['默认安排', { playerRounds: EB_SETTINGS_DEFAULT.playerRounds, enemyRounds: EB_SETTINGS_DEFAULT.enemyRounds, on: true }],
+        ['每回合双方', { playerRounds: CONFIGURABLE_ROUNDS, enemyRounds: CONFIGURABLE_ROUNDS, on: true }],
+        ['仅我方', { playerRounds: CONFIGURABLE_ROUNDS, enemyRounds: [] }],
+        ['全部关闭', { playerRounds: [], enemyRounds: [] }]].map(([label, patch]) => html`<${Button} variant="ghost" size="sm" disabled=${disabled} onClick=${() => set(patch)}>${t(label)}<//>`)}
+    </div>
+    <div class="ebset__schedule" role="group" aria-label=${t('每回合强化安排')}>
+      <b>${t('回合')}</b><b>${t('我方海克斯')}</b><b>${t('敌方强化')}</b>
+      ${CONFIGURABLE_ROUNDS.map((r) => html`<span key=${'r'+r}>${r}</span>
+        <input key=${'p'+r} type="checkbox" checked=${s.playerRounds.includes(r)} disabled=${disabled} aria-label=${t('第 {r} 回合我方海克斯', { r })}
+          onChange=${(e) => set({ playerRounds: e.currentTarget.checked ? [...s.playerRounds, r] : s.playerRounds.filter((x) => x !== r) })} />
+        <input key=${'e'+r} type="checkbox" checked=${s.enemyRounds.includes(r)} disabled=${off} aria-label=${t('第 {r} 回合敌方强化', { r })}
+          onChange=${(e) => set({ enemyRounds: e.currentTarget.checked ? [...s.enemyRounds, r] : s.enemyRounds.filter((x) => x !== r) })} />`)}
+    </div>
     ${EB_TIERS.map((tier, i) => {
       const pct = Math.round((s.weights[i] / EB_WEIGHT_MAX) * 100);
       return html`<label key=${tier} class=${cx('ebset__row', 'ebset__tier', `ebset__tier--t${tier}`)}>
@@ -79,15 +94,15 @@ export function EnemyBuffEditor({ value, onChange, disabled = false }) {
       </label>`;
     })}
     <div class="ebset__row">
-      <span class="ebset__label">${t('第 {r} 回合不出彩色', { r: VOTE_ROUNDS[0] })}</span>
-      <${Toggle} value=${s.firstNoPrism} disabled=${off} label=${t('第 {r} 回合不出彩色', { r: VOTE_ROUNDS[0] })} onChange=${(firstNoPrism) => set({ firstNoPrism })} />
+      <span class="ebset__label">${t('首次敌方强化不出彩色')}</span>
+      <${Toggle} value=${s.firstNoPrism} disabled=${off} label=${t('首次敌方强化不出彩色')} onChange=${(firstNoPrism) => set({ firstNoPrism })} />
     </div>
     <p class="ebset__note">${s.on
       ? t('每次投票的品质概率：{line}；第 {r} 回合：{first}', {
-        line: chances.map((p, i) => `${t(EB_TIER_NAME[EB_TIERS[i]])} ${p}%`).join(' · '), r: VOTE_ROUNDS[0],
+        line: chances.map((p, i) => `${t(EB_TIER_NAME[EB_TIERS[i]])} ${p}%`).join(' · '), r: s.enemyRounds[0] ?? 2,
         first: first.map((p, i) => `${t(EB_TIER_NAME[EB_TIERS[i]])} ${p}%`).join(' · '),
       })
-      : t('关闭后不再投票，敌人整局不获得强化（海克斯照常）')}</p>
+      : t('关闭后不再新增敌方强化，我方海克斯按回合设置执行')}</p>
   </div>`;
 }
 
@@ -104,11 +119,11 @@ export function EnemyBuffStrip({ value, editable = false, busy = false, onSave =
     try { await onSave(next); setDraft(null); } catch { /* the caller toasts its own error; the editor stays open */ }
   };
   return html`<div class=${cx('ebstrip', !s.on && 'is-off', cls)}>
-    <span class="ebstrip__label"><${Icon} name="sword" />${t('敌人强化')}</span>
-    <span class="ebstrip__sum">${s.on ? tierChances(s).map((p, i) => html`<b key=${i} class=${`ebstrip__tier ebset__tier--t${EB_TIERS[i]}`}>${t(EB_TIER_NAME[EB_TIERS[i]])} <span class="num">${p}%</span></b>`) : html`<b class="ebstrip__off">${t('关闭')}</b>`}
-      ${s.on && s.firstNoPrism ? html`<small>${t('第 {r} 回合不出彩色', { r: VOTE_ROUNDS[0] })}</small>` : null}</span>
-    ${editable ? html`<${Button} variant="ghost" size="sm" icon="edit" class="ebstrip__edit" loading=${busy} onClick=${() => setDraft({ on: s.on, weights: s.weights.slice(), firstNoPrism: s.firstNoPrism })}>${t('调整')}<//>` : null}
-    <${Modal} open=${!!draft} onClose=${() => setDraft(null)} title=${t('敌人强化')} micro="ENEMY UPGRADES" width="7.2rem"
+    <span class="ebstrip__label"><${Icon} name="sword" />${t('海克斯与敌方强化')}</span>
+    <span class="ebstrip__sum"><small>${t('我方海克斯')}：${s.playerRounds.join('、') || '—'}<br/>${t('敌方强化')}：${s.on ? s.enemyRounds.join('、') || '—' : t('关闭')}</small>${s.on ? tierChances(s).map((p, i) => html`<b key=${i} class=${`ebstrip__tier ebset__tier--t${EB_TIERS[i]}`}>${t(EB_TIER_NAME[EB_TIERS[i]])} <span class="num">${p}%</span></b>`) : html`<b class="ebstrip__off">${t('关闭')}</b>`}
+      ${s.on && s.firstNoPrism ? html`<small>${t('首次敌方强化不出彩色')}</small>` : null}</span>
+    ${editable ? html`<${Button} variant="ghost" size="sm" icon="edit" class="ebstrip__edit" loading=${busy} onClick=${() => setDraft({ ...s })}>${t('调整')}<//>` : null}
+    <${Modal} open=${!!draft} onClose=${() => setDraft(null)} title=${t('海克斯与敌方强化')} micro="ENEMY UPGRADES" width="7.2rem"
       actions=${html`<${Button} variant="secondary" onClick=${() => setDraft(null)}>${t('取消')}<//>
         <${Button} variant="primary" icon="check" loading=${busy} onClick=${save}>${t('确定')}<//>`}>
       ${draft ? html`<${EnemyBuffEditor} value=${draft} onChange=${setDraft} disabled=${busy} />` : null}
