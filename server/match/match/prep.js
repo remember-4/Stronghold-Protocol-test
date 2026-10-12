@@ -1,3 +1,4 @@
+import { settleClosureCredit } from '../../../shared/sarkazCredit.js';
 // server/match/match/prep.js — Match methods: the PREP phase — its start (deferred item merges, onPrepStart), the AI
 // seats' sliced preps (scheduleBotPrep: economy + layout, rehearsal, Ready), Ready and the deadline, and its end
 // (onPrepEnd, PlayerState.endPrep, then COMBAT or the Final Assault / Hidden Core).
@@ -127,7 +128,7 @@ export class MatchPrep {
     this.setDeadline(0);
     const alive = this.alivePlayers();
     for (const ps of alive) this.dispatch(ps, 'onPrepEnd', { round: this.round });
-    for (const ps of alive) ps.endPrep();
+    for (const ps of alive) { settleClosureCredit(ps); ps.endPrep(); }
     const r = this.round;
     if (r === this.gd.bossRound) {
       this.hiddenLayerSum = alive.reduce((s, p) => s + p.activatedLayers(), 0);

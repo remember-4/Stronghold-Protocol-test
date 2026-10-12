@@ -59,7 +59,7 @@ export const KIT_FILES = Object.freeze([
     'chess_char_5_17-f12yin.js', 'chess_char_5_18-gvial2.js', 'chess_char_5_19-mlynar.js', 'chess_char_5_20-aglina.js',
     'chess_char_5_21-sntlla.js', 'chess_char_5_22-nymph.js', 'chess_char_5_23-reckpr.js'],
   // tier 6 (and 盟约·辅助干员 chess_char_1_15, a hidden tier-1 chess always registered with the tier-6 kits)
-  ['chess_char_6_custom_clemnt.js', 'chess_char_6_custom_phatm2.js', 'chess_char_1_15-pithst.js', 'chess_char_6_01-lemuen.js', 'chess_char_6_02-sbell2.js', 'chess_char_6_03-yu.js',
+  ['chess_char_6_sarkaz.js', 'chess_char_6_custom_clemnt.js', 'chess_char_6_custom_phatm2.js', 'chess_char_1_15-pithst.js', 'chess_char_6_01-lemuen.js', 'chess_char_6_02-sbell2.js', 'chess_char_6_03-yu.js',
     'chess_char_6_04-skadi2.js', 'chess_char_6_05-pasngr.js', 'chess_char_6_06-pepe.js', 'chess_char_6_07-siege2.js',
     'chess_char_6_08-reed2.js', 'chess_char_6_09-cello.js', 'chess_char_6_10-nymph.js', 'chess_char_6_11-mlyss.js',
     'chess_char_6_12-rosmon.js', 'chess_char_6_13-angel2.js', 'chess_char_6_14-lumen.js', 'chess_char_6_15-qiubai.js',
@@ -79,6 +79,7 @@ export const STANDIN_KIT_FILES = Object.freeze(['standin-acguad.js', 'standin-sh
  * data/backups.json; a new file is appended). An operator without a file is not offered as a 自选 pick (KITTED_CHARS).
  */
 export const OPERATOR_KIT_FILES = Object.freeze([
+  'op-threye.js',
   'op-siege.js',
   'op-chen.js',
   'op-irene.js',
@@ -197,4 +198,4 @@ export const KITS = Object.freeze(Object.assign({}, ...TIER_KITS, STANDIN_KITS, 
  * file and the operators of OPERATOR_KIT_FILES whose file loaded. The `kitted` option of shared/diy.js diyPool /
  * validateDiyPicks.
  */
-export const KITTED_CHARS = Object.freeze([...new Set([...GENERIC_KIT_CHARS, ...Object.keys(STANDIN_KITS), ...Object.keys(OPERATOR_KITS)])]);
+export const KITTED_CHARS = Object.freeze([...new Set([...GENERIC_KIT_CHARS, ...Object.keys(STANDIN_KITS), ...Object.keys(OPERATOR_KITS)])].filter(id=>!['char_4228_closur','char_2012_typhon','char_1035_wisdel','char_4088_hodrer'].includes(id)));

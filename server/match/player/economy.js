@@ -4,6 +4,7 @@
 // Installed on PlayerState.prototype by server/match/PlayerState.js (a method container: never instantiated; `this` is
 // the player state).
 
+import { fundsFloor } from '../../../shared/sarkazCredit.js';
 import { ERR, layerGainRoom } from '../../../shared/constants.js';
 import { freeSlot } from '../board.js';
 import { OK, fail } from './common.js';
@@ -17,7 +18,7 @@ export class PlayerEconomy {
     // 海克斯·灵质: no gain but the round income and a sale
     if (v > 0 && fundsVoided(this, v, reason)) return 0;
     const before = this.funds;
-    this.funds = Math.max(0, this.funds + v);
+    this.funds = Math.max(fundsFloor(this), this.funds + v);
     if (v > 0) this.stats.fundsGained += v;
     if (v > 0 && String(reason).startsWith('augment:')) this.augFunds = (this.augFunds || 0) + v; // (audit.js)
     // A6000 fork: funds a 敌人强化 takes back (限流), as taken (never below 0) — audit.js counts them at the round start
@@ -30,7 +31,7 @@ export class PlayerEconomy {
 
   spend(n) {
     const v = Number.isFinite(n) ? Math.max(0, Math.trunc(n)) : 0;
-    if (v > this.funds) return false;
+    if (v > this.funds - fundsFloor(this)) return false;
     this.funds -= v;
     this.stats.gold += v;
     this.round.spent += v;
@@ -169,7 +170,7 @@ export class PlayerEconomy {
     // A6000 fork: 海克斯·闭关修炼 — no operator bought in its rounds
     if (slot.kind === 'chess') { const lock = shopLock(this, 'buy'); if (lock) return lock; }
     const price = this.priceOf(slot);
-    if (this.funds < price) return fail(ERR.NO_FUNDS);
+    if (this.funds - fundsFloor(this) < price) return fail(ERR.NO_FUNDS);
     // (A6000 fork, 海克斯第六版 负重前行: a closed hand slot is no room — player/pieces.js openHandSlot)
     const handFull = this.openHandSlot() < 0;
     // A6000 fork: 海克斯·预备队 — a full hand buys into the 临时整备区 while it has room (temp blocks Ready until resolved)
@@ -213,7 +214,7 @@ export class PlayerEconomy {
     const lock = shopLock(this, 'refresh'); if (lock) return lock;
     const free = this.shop.freeRefreshes > 0;
     let price = free ? 0 : this.refreshPriceNow();
-    if (!free && this.funds < price) return fail(ERR.NO_FUNDS);
+    if (!free && this.funds - fundsFloor(this) < price) return fail(ERR.NO_FUNDS);
     // A6000 fork: 海克斯·幸运刷新 — a paid refresh may cost nothing (drawn for a holder who can pay it)
     const lucky = !free && price > 0 && luckyRefresh(this);
     if (lucky) price = 0;
@@ -240,7 +241,7 @@ export class PlayerEconomy {
     const g = this._gate(); if (g) return g;
     if (this.shop.level >= this.gd.maxShopLevel) return fail(ERR.MAX_LEVEL);
     const price = Math.max(0, this.shop.upgradePrice);
-    if (this.funds < price) return fail(ERR.NO_FUNDS);
+    if (this.funds - fundsFloor(this) < price) return fail(ERR.NO_FUNDS);
     this.spend(price);
     this.shop.level++;
     this.shop.upgradePrice = this.gd.upgradeBase(this.shop.level) ?? 0;

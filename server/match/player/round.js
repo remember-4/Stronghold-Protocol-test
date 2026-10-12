@@ -1,3 +1,4 @@
+import { repayClosureCredit } from '../../../shared/sarkazCredit.js';
 // server/match/player/round.js — PlayerState methods: the round lifecycle the match calls — startRound (income, pending
 // coins, the shop, summon stacks topped up), endPrep, eliminate (every copy back to the pool), recompute (legality,
 // out-of-range summons, temp pieces into free hand slots, bonds), the bond views — and battleInput (the player's
@@ -23,6 +24,7 @@ export class PlayerRound {
     incomeRule(this, ev);
     const nonNeg = (v) => (Number.isFinite(v) && v > 0 ? Math.trunc(v) : 0);
     this.addFunds(nonNeg(ev.income) + nonNeg(ev.pending), { reason: 'income' });
+    repayClosureCredit(this);
     // temp is NOT wiped here: the last prep's deadline resolved what the player could act on (endPrep); what overflowed
     // after it (battle-result grants, SETTLE merges, returned equipment) is shown and usable in this prep (tempDue).
     // Likewise reward offers of the last prep already expired at its end; what is still queued was earned after it —

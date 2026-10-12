@@ -154,7 +154,7 @@ export function shopBlockReason(kind, { priv, editable, slot } = {}) {
     if (kind === 'reward') return t('当前无法选择');
     return priv.ready ? t('已准备就绪，取消准备后才能操作') : t('当前阶段无法进行该操作');
   }
-  const funds = Number(priv.funds) || 0;
+  const funds = (Number(priv.funds) || 0) - Math.min(0, Number(priv.fundsFloor) || 0);
   const shop = priv.shop || {};
   if (kind === 'buy' || kind === 'reward') {
     if (!isObj(slot) || slot.sold) return kind === 'reward' ? t('已选择') : t('已售出');

@@ -15,14 +15,14 @@ function setup(layers = 0, active = true, id = 'chess_char_5_03_a', loadout = {}
 }
 const fill=(b,u,e,el='apoptosis') => b.dealDamage(u,e,{type:'element',element:el,amount:e.gaugeMax});
 
-test('2 distinct members activate; duplicate normal/elite do not count twice; traits unchanged',()=>{
+test('2 distinct members activate; duplicate normal/elite do not count twice; current member list',()=>{
  const data=getData({log:{info(){},warn(){},error(){}}}); const gd=new GameData(data,'mode_multi_funny');
  const ps={board:new Map(),hand:[],bonds:{},bondLayers:{},augments:[]};
  const add=(key,id)=>ps.board.set(key,{uid:key,kind:'chess',id,items:[]});
  add(1,'chess_char_2_05_a');add(2,'chess_char_2_05_b');
  assert.equal(computeBonds(gd,ps).elementShip.active,false);
- add(3,'chess_char_3_06_a');assert.equal(computeBonds(gd,ps).elementShip.active,true);
- for(const c of Object.values(data.chess)) if(['哈洛德','菲莱','烛煌','妮芙','余','塑心'].includes(c.name)) assert.ok(c.bonds.includes('elementShip'));
+ add(3,'chess_char_2_sarkaz_threye_a');assert.equal(computeBonds(gd,ps).elementShip.active,true);
+ for(const c of Object.values(data.chess)) if(['哈洛德','凛视','烛煌','妮芙','余','塑心'].includes(c.name)) assert.ok(c.bonds.includes('elementShip'));
 });
 test('active base effect: 100 elemental HP damage becomes 125, arts and gauge damage unchanged',()=>{
  const {b,u,e}=setup();near(b.dealDamage(u,e,{type:'elemental',amount:100}),125);

@@ -279,6 +279,13 @@ function ammoScope(it, u) {
 }
 
 const INSTALLERS = {
+  custom_sarkaz_wisdel(battle,list){
+    for(const it of list){const seen=new Set();battle.on('skillStart',({unit:u})=>{
+      if(seen.has(u)||!S.onField(it.unit)||!S.isOp(u)||u.ownerId!==it.unit.ownerId||!S.isMember(battle,u,'sarkazShip'))return;
+      seen.add(u);S.gainLayers(battle,{playerId:it.unit.ownerId,bonds:['sarkazShip'],n:it.bb.layer,source:it.unit,reason:'garrison'});
+    });}
+  },
+
   custom_element_clemnt(battle, list) {
     battle.on('death', ({ unit: victim, reason }) => {
       if (reason !== 'killed' || !S.isOp(victim) || victim.side !== 'ally' || !S.isMember(battle, victim, 'egirShip')) return;

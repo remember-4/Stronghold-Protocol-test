@@ -499,6 +499,17 @@ const BY_BUFF = {
 
 /** Item-key behaviours. */
 const BY_ITEM = {
+  chess_item_6_sarkaz_crown_e(battle,u,rec,S){
+    let accumulated=0;
+    S.on('sarkazWillGain',({unit,amount})=>{
+      if(!onField(u)||!memberOf(battle,u,'sarkazShip'))return;
+      if(unit===u){if(u.skill)u.skill.gainSp(4,'item');S.buff(u,{key:S.key('willInvulnerability'),duration:.5,refresh:'replace',flags:{invulnerable:true},tags:['item','blackCrown']});return;}
+      if(unit.ownerId!==u.ownerId||!carries(battle,u,'chess_item_4_06_e'))return;
+      accumulated+=amount;
+      const count=Math.floor((accumulated+1e-9)/4);if(count>0){accumulated=Math.max(0,accumulated-4*count);for(let i=0;i<count;i++)battle.gainSarkazWill?.(u,1,'blackCrown');}
+    });
+    S.on('death',({unit,reason})=>{if(unit===u&&reason==='killed')accumulated=0;});
+  },
   // 精准狙击镜: damage ×damage_scale against targets ≥ radius tiles away
   chess_item_3_02_e(battle, u, rec, S) {
     const p = bp(rec, 'act1autochess_equip_acarm063_global_buff');

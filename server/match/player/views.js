@@ -1,3 +1,4 @@
+import { fundsFloor } from '../../../shared/sarkazCredit.js';
 // server/match/player/views.js — PlayerState methods: the views — pieceView, effectsView (the effects column: 策略 / 机变 /
 // 悬赏 …) and m.private (privateView).
 // Installed on PlayerState.prototype by server/match/PlayerState.js (a method container: never instantiated; `this` is
@@ -68,6 +69,8 @@ export class PlayerViews {
       alive: this.alive,
       lp: this.lp,
       funds: this.funds,
+      fundsFloor: fundsFloor(this),
+      closureDebt: this.counters.closureDebt || 0,
       bandId: this.bandId,
       ready: this.ready,
       canReady: this.alive && this.tempEmpty && this.m.phase === PHASE.PREP,

@@ -2312,5 +2312,7 @@
   "每有 1 名护卫存活，领袖受到的伤害 −{pct}%（至多 −{max}%）": "For every escort alive, leaders take {pct}% less damage (at most {max}%)",
   "首领·复苏": "Leader · Revival",
   "领袖第一次降到 {hpPct}% 生命时，回复共享血池的 {pct}%（每场一次）": "The first time a leader drops to {hpPct}% HP, it restores {pct}% of the shared pool (once a fight)",
-  "首领·复苏：领袖回复了共享血池的 {pct}%": "Leader · Revival: the leader restored {pct}% of the shared pool"
+  "首领·复苏：领袖回复了共享血池的 {pct}%": "Leader · Revival: the leader restored {pct}% of the shared pool",
+  "资金下限": "Funds floor",
+  "待偿还": "Debt due"
 }

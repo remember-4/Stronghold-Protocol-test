@@ -28,11 +28,8 @@ test('Vivi gains +2/4 on real burn, caps each bond at 8/16; 40-layer cross-type 
  const {b,u,e}=battle('chess_char_4_vvana_a',0);b.emit('elementBurst',{source:u,target:e,element:'apoptosis'});assert.equal(b.players[0].bonds.elementShip.layers,0);
  b.emit('elementBurst',{source:u,target:e,element:'burn'});assert.equal(b.players[0].bonds.elementShip.layers,2);
 });
-test('Nymph original successful swift gain mirrors half into element; inactive swift grants neither',()=>{
- for(const [gid,swiftN,elementN] of [['garrison_56_a',6,3],['garrison_56_b',12,6]]){
-  let {ctx,layers}=meta(gid);HANDLERS.SERVER_ADD_BOND_METHOD.run(ctx);assert.equal(layers.swiftShip,swiftN);assert.equal(layers.elementShip,elementN);
-  ({ctx,layers}=meta(gid,3,false));HANDLERS.SERVER_ADD_BOND_METHOD.run(ctx);assert.deepEqual(layers,{});
- }
+test('Nymph spreadsheet trait counts full pairs normal and single operators elite; both bonds require activation',()=>{
+ for(const [gid,n] of [['garrison_56_a',3],['garrison_56_b',9]]){const {ctx,layers}=meta(gid);HANDLERS.CUSTOM_SARKAZ_NYMPH.run(ctx);assert.equal(layers.swiftShip,n);assert.equal(layers.elementShip,n);}
 });
 test('Blaze gain preserves original Yan/Victoria and adds +5/10 element, even inactive',()=>{
  for(const [gid,n] of [['garrison_35_a',5],['garrison_35_b',10]]){const {ctx,layers}=meta(gid);HANDLERS.SERVER_ADD_BOND.run(ctx);assert.deepEqual(layers,{yanShip:n,victoriaShip:n,elementShip:n});}

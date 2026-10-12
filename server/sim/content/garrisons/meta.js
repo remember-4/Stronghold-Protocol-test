@@ -126,6 +126,15 @@ H.SERVER_ADD_BOND_CHESS_ALL = {
   },
 };
 
+H.CUSTOM_SARKAZ_CLOSURE = { run(ctx) {
+  if(ctx.funds()<0)return;
+  const bb=ctx.source.bb,n=Math.min(bb.cap,Math.floor(ctx.roundStats().spent/3)*bb.layer);
+  addAll(ctx,['visiShip','sarkazShip'],n,true);
+}};
+H.CUSTOM_SARKAZ_NYMPH = { run(ctx) {
+  const bb=ctx.source.bb,n=Math.floor(ctx.hand().filter(p=>p?.kind==='chess').length/bb.per)*3;
+  addAll(ctx,['elementShip','swiftShip'],n,true);
+}};
 H.SERVER_ADD_BOND_METHOD = {
   run(ctx) {
     const { bb, bbStr, garrison } = ctx.source;

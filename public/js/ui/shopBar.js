@@ -367,7 +367,7 @@ export function ShopBar({ priv, editable, collapsed, onCollapse, onBuy, onLevel,
           <${CoinGlyph} class="funds__coin" />
           <b class="funds__num num">${funds}</b>
         </div>
-        <span class="funds__label">${t('目前资金')}</span>
+        <span class="funds__label">${t('目前资金')}${Number(priv?.fundsFloor)<0 ? html` · ${t('资金下限')} ${priv.fundsFloor}` : null}${Number(priv?.closureDebt)>0 ? html` · ${t('待偿还')} ${priv.closureDebt}` : null}</span>
         <button type="button" class="funds__collapse" onClick=${() => onCollapse(true)}><${Icon} name="close" />${t('收起')}</button>
       </div>
     </div>
