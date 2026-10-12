@@ -42,10 +42,9 @@ export class PlayerPrep {
       if (handFull) return fail(ERR.HAND_FULL);
     }
     const price = Number.isFinite(slot.price) && slot.price > 0 ? Math.trunc(slot.price) : 0;
-    if (price > this.funds) return fail(ERR.NO_FUNDS);
+    if (price > 0 && !this.spend(price)) return fail(ERR.NO_FUNDS);
     slot.sold = true;
     this.offers.shift();
-    if (price > 0) this.spend(price);
     if (slot.kind === 'item') this.acquireItem(slot.id, { source: 'reward' });
     else {
       this.acquireChess(slot.id, { source: 'reward' });

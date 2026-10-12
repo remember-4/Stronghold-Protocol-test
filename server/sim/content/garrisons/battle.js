@@ -218,6 +218,14 @@ function conditionMet(battle, it) {
 
 /** Fire a layer-gain garrison instance. Returns the layers added. */
 export function fireGain(battle, it) {
+  if (it.bb.bond_add_counts && typeof it.bb.bond_add_counts === 'object') {
+    let total = 0;
+    for (const [bond, n] of Object.entries(it.bb.bond_add_counts)) {
+      const { bond_add_counts, ...bb } = it.bb;
+      total += fireGain(battle, { ...it, bb: { ...bb, bond_add_count: n }, bbStr: { ...it.bbStr, bond_type: 'bond_by_id', bond_id: bond } });
+    }
+    return total;
+  }
   if (!conditionMet(battle, it)) return 0;
   const bonds = targetBonds(battle, it);
   if (!bonds.length) return 0;
@@ -328,7 +336,11 @@ const INSTALLERS = {
     const m = byUnit(list);
     battle.on('skillStart', ({ unit }) => {
       const arr = m.get(unit);
-      if (arr) for (const it of arr) fireGain(battle, it);
+      if (arr) for (const it of arr) {
+        if (it.bb.first_skill_only && it.skillSeen) continue;
+        it.skillSeen = true;
+        fireGain(battle, it);
+      }
     });
   },
 

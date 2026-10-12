@@ -19,13 +19,13 @@
 /**
  * Per-match disabled bond set D and banned chess (research 01 A2): D = uniform sample of `core` core bonds and `addon`
  * add-on bonds among weight > 0 bonds that are active in the mode. A visible chess is banned iff every one of its
- * bonds is in D ∪ mode.inactiveBondIds.
+ * bonds is in D ∪ mode.inactiveBondIds; then `extraChess` additional distinct visible default operators are sampled.
  * @param {import('./gamedata.js').GameData} gd
  * @param {Function} rng seeded rng (createRng)
  * @returns {{ drawn: string[], staticOff: string[], banned: string[] }}
  */
 export function drawDisabledBonds(gd, rng) {
-  const { core: nCore, addon: nAddon } = gd.bans(gd.difficulty);
+  const { core: nCore, addon: nAddon, extraChess = 0 } = gd.bans(gd.difficulty);
   const staticOff = [...gd.modeInactiveBonds].filter((b) => gd.bond(b)).sort();
   const eligible = gd.bondIds.filter((b) => {
     const bond = gd.bond(b);
@@ -41,6 +41,9 @@ export function drawDisabledBonds(gd, rng) {
     const bonds = Array.isArray(c.bonds) ? c.bonds : [];
     if (bonds.length > 0 && bonds.every((b) => off.has(b))) banned.push(id);
   }
+  const candidates = gd.visibleChess.filter((id) => !banned.includes(id));
+  banned.push(...sample(candidates, extraChess, rng));
+  banned.sort();
   return { drawn, staticOff, banned };
 }
 

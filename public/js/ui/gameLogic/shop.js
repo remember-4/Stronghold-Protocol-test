@@ -158,7 +158,7 @@ export function shopBlockReason(kind, { priv, editable, slot } = {}) {
   const shop = priv.shop || {};
   if (kind === 'buy' || kind === 'reward') {
     if (!isObj(slot) || slot.sold) return kind === 'reward' ? t('已选择') : t('已售出');
-    if ((Number(slot.price) || 0) > funds) return t('资金不足');
+    if ((Number(slot.price) || 0) > 0 && (Number(slot.price) || 0) > funds) return t('资金不足');
     // a full hand refuses every purchase / pick, a merge-completing one too (PRTS 卫戍协议/帮助 §手牌区, GitHub #82) — but
     // a purchase with 海克斯·预备队 while the 临时整备区 has room (A6000 fork)
     if (handFull(priv) && !(kind === 'buy' && reserveRoom(priv))) return t('整备区已满');

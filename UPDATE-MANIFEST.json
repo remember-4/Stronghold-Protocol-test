@@ -1,23 +1,25 @@
 {
-  "baseCommit": "a0e3100d363ca36c141c4bf5adbfc9565b111b87",
+  "baseCommit": "bd868f558c3c36d0e846ee1793d3595eaf60eada",
   "files": {
-    "data/backups.json": "75e8630b90e3fa6be082828d0598a2a96f5691d7ec367c7aded7274bfed4d0b8",
-    "data/chess.json": "28217c2863cd77ec67c46dc8b3e734074876e165db7dc668e9a1c5dcc5dca58f",
-    "docs/updates/hex-schedule-20261012.md": "770cc75b6f139d70352735dd75e4834a529d4a6aad414f9d3a6609028ccad99d",
-    "public/css/components.css": "d764a64545aacf550c026b83f2e41e1c588a31739a99e1b8c3425d3329d45f37",
-    "public/i18n/en.json": "459f455f0478bba86d4d04ea26833c2cce40955eca5e7fca0620b41196227885",
-    "public/i18n/ja.json": "ddc422c44304bf6d91a44831ea42d9e9171f5a6bb2d1758d4af9ecac2d52b4ad",
-    "public/i18n/ko.json": "5047ad7159f19a9448a56cfaf888ceca8dc786b3f7f5151825e0a474fdeefafa",
-    "public/i18n/zh-TW.json": "c8ec669f424493a05cd413860986d91e9f6cb055743275646cf15e190b718b35",
-    "public/js/main.js": "9930400257fd2c7624e692291bb424103a87f812b9a5752d298074b61bf0a5d0",
-    "public/js/screens/lobby.js": "134f99e2e26572ca9b443e2a7b44777a54b34f30fd21dbc4e2ceef04afda3d00",
-    "public/js/skins.js": "db77d457bbe4a7ffa097a02b2e32a5217f9bc18ac60be473a8fdcd5dd20e1a98",
-    "public/js/ui/enemyBuffSettings.js": "4777a1b42778d84ce84cb7b320fea1ecfe8ba87e9734c7cdaec519fc49aab45e",
-    "server/lobby.js": "3ac83134a0b1610f7b81321f773546bf7c3b808413bf153c312296ae6d6e2a4d",
-    "server/match/match/augments.js": "0764af9116c2895003f98a4e2a56316a8eaadbec1e2b0b296e701e7da9d8e40e",
-    "server/match/match/enemyVotes.js": "64a5f5860b270ac6bc0caecfb12ddc58822bb570b7c7e9b4c6240f562b379d63",
-    "shared/enemyBuffs.js": "357094e70bd036f10d4e54a20e4a535c107dd3ed4101ab379bf68ecd7c5ddcbd",
-    "test/hex-schedule.test.js": "88c435f6bd2d65ee1082e9230d425f01a765f18cbfb9ce073485a83539a606d7",
-    "tools/custom/threye-unit.json": "f879a4ce3e709ed917f96fd24006503427d7a8ff722a3929aad48e6d70dd3637"
+    "data/bonds.json": "a47449e1507168e3997b90bf96124ca2687c311d4b032f773f93082f91be3fc9",
+    "data/chess.json": "6e9763fba91446fba288385b183d04dfa4fa7ec3f3915dfdfdc505a8f28aaddf",
+    "data/config.json": "064a4525f6bc46173c06381dede02df1f890af4b6ed366b9a9eded4ba31a1847",
+    "data/garrisons.json": "e7fa69385ae9aa0f0bd888b4d756595934c7d3a2671527c0fbd2613182c0fc9b",
+    "docs/updates/sarkaz-rebalance-20261012.md": "84feb3a1cafd880424190009e49d77487a6b240c8c9b81c95a1aac39266c58fb",
+    "public/js/ui/detailPanel.js": "dbd790542b74fc97d2da1c5411821eb13aa13a5e49adf565974d30539a5c90a9",
+    "public/js/ui/gameLogic/shop.js": "f5b2bda918d58ea17e4fb2e8eb150a5e66afd0367757f18773a5ebdb7537400a",
+    "server/match/gamedata.js": "25deab17f9793c56a55bfcf0aae7d8505fd04e901b712d63a593aad9692a9e17",
+    "server/match/player/prep.js": "e8ff4ae84c673336aa036edccf1ae946b38175e47285bbbee9fb590c6736ea6a",
+    "server/match/pool.js": "9393e8a96c6048089ab2c6bae2e8ed931d3d102bb22c45aa40139fcccf3d2c69",
+    "server/sim/content/bonds/sarkaz.js": "50af9c860a2683ae64e4d802a7375b0590bb3ef179643959c6abc2a76cc4e903",
+    "server/sim/content/garrisons/battle.js": "1bbc6c903bd8c120d79d00d62fc432f804ff334371b365b2da5e25ccb8a7d59a",
+    "test/sarkaz-rebalance.test.js": "aa6fa898d4c399a1df95ddf0716989f960dab9121b6b692744ce52b696f3d42e",
+    "test/sarkaz.test.js": "23695c7548d438b81ca0c7c6761350a5a179540dc1bab6132d02a5a2b55cca7d",
+    "tools/custom/sarkaz-roster.mjs": "18f3952ffa563821ee2dd8c6ee24f052c3957247a0e9b2e79a14b62bb060d8c9"
+  },
+  "tests": {
+    "total": 90,
+    "passed": 90,
+    "failed": 0
   }
 }
