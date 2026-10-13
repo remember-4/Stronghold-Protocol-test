@@ -2327,5 +2327,6 @@
   "第 {r} 回合我方海克斯": "Round {r}: player augments",
   "第 {r} 回合敌方强化": "Round {r}: enemy upgrades",
   "逐回合选择是否新增强化；关闭某回合不会移除之前获得的强化。第14、15回合仅在进入对应战斗时生效。": "Choose new upgrades for each round. Disabling a round keeps earlier upgrades. Rounds 14–15 apply only if reached.",
-  "关闭后不再新增敌方强化，我方海克斯按回合设置执行": "No new enemy upgrades while disabled; player augments follow the schedule."
+  "关闭后不再新增敌方强化，我方海克斯按回合设置执行": "No new enemy upgrades while disabled; player augments follow the schedule.",
+  "雇佣兵": "Mercenary"
 }

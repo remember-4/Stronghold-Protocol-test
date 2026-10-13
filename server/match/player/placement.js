@@ -1,3 +1,4 @@
+import { mercenaryBonus } from './customLeaders.js';
 // server/match/player/placement.js — PlayerState methods: g.move — placement legality on the deploy field (board.js),
 // the summon ranges of 狼群 / 流形 (ownerRange) and the summons an owner's move or re-orientation leaves out of range,
 // operator / summon moves onto the board, back to the hand, between hand and temp, swaps and re-orientation in place.
@@ -173,9 +174,9 @@ export class PlayerPlacement {
       return OK;
     }
     // hand/temp → board
-    if (!occ || occ.kind !== 'chess') {
-      if (this.deployCount >= this.deployCap) return fail(ERR.BOARD_FULL);
-    }
+    const projectedCap = this.deployCap - mercenaryBonus(this) + mercenaryBonus(this, piece, occ);
+    const projectedCount = this.deployCount + (occ?.kind === 'chess' ? 0 : 1);
+    if (projectedCount > projectedCap) return fail(ERR.BOARD_FULL);
     // (A6000 fork, 负重前行: the occupant swapped back would go into a closed hand slot — player/pieces.js handSlotOpen)
     if (occ && occ.kind === 'chess' && loc.area === 'hand' && !this.handSlotOpen(loc.idx)) return fail(ERR.HAND_FULL, 'slot closed');
     this._detach(loc);

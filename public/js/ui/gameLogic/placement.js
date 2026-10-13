@@ -379,7 +379,12 @@ export function canPlace(ctx, uid, target) {
       if (Number.isInteger(piece.ownerUid) && !ownerDeployed) return no('BAD_TARGET', t('召唤者尚未部署'));
       return { ok: true, action: 'move' };
     }
-    if ((!occ || occ.piece.kind !== 'chess') && ctx.count >= ctx.cap) return no('BOARD_FULL', t('已达到部署上限'));
+    const mercenaryLeader = ctx.priv?.bandId === 'band_custom_hodrer';
+    const oldMercenary = mercenaryLeader && [...ctx.boardAt.values()].some(e => e.piece.kind === 'chess' && e.piece.mercenary);
+    const newMercenary = mercenaryLeader && (piece.mercenary || [...ctx.boardAt.values()].some(e => e !== occ && e.piece.kind === 'chess' && e.piece.mercenary));
+    const projectedCap = ctx.cap - (oldMercenary ? 1 : 0) + (newMercenary ? 1 : 0);
+    const projectedCount = ctx.count + (occ?.piece.kind === 'chess' ? 0 : 1);
+    if (projectedCount > projectedCap) return no('BOARD_FULL', t('已达到部署上限'));
     return { ok: true, action: occ ? 'swap' : 'move' };
   }
   return no('BAD_TILE', t('无法放置在该位置'));

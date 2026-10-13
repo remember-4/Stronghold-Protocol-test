@@ -102,6 +102,7 @@ export function ChessCard({ slot, idx, priv, frozen = false, reason = null, free
     </span>
     ${si ? html`<span class="scard__standin" data-standin=${si.charId} data-for=${c0.chessId} title=${standInTip(si, c0.name)}>${standInLabel(si)}</span>` : null}
     ${dr ? html`<span class="scard__diy" data-diy=${dr.charId} title=${t('自选编队：{name}（只在你的商店出现）', { name: dr.name })}>${t('自选')}</span>` : null}
+    ${slot.mercenary ? html`<span class="scard__mercenary">${t('雇佣兵')}</span>` : null}
     <span class="scard__body">
       ${lo?.skill ? html`<${SkillBadge} chess=${c} lo=${lo} standIn=${!!si} />` : null}
       <span class="scard__name">${c?.name || slot.id}</span>
@@ -159,6 +160,7 @@ export function ItemCard({ slot, idx, frozen = false, reason = null, free = fals
       <${PriceHex} slot=${slot} free=${free} poor=${reason === t('资金不足')} />
     </span>
     <span class="scard__itemart"><${Img} src=${itemIconUrl(m, it)} fallback=${html`<${GIcon} name="bolt" />`} /></span>
+    ${slot.mercenary ? html`<span class="scard__mercenary">${t('雇佣兵')}</span>` : null}
     <span class="scard__body">
       <span class="scard__name">${it?.name || slot.id}</span>
       <span class="scard__idesc"><${RichText} text=${it?.descRaw || it?.desc || ''} /></span>

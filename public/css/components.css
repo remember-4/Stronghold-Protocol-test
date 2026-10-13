@@ -1055,3 +1055,5 @@
 
 .ebset__schedule{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.1rem;align-items:center;text-align:center;max-height:3.8rem;overflow:auto;padding:.12rem;border:1px solid var(--line,#555)}
 .ebset__schedule input{justify-self:center;width:20px;height:20px;accent-color:#49bdaa}.ebset__presets{display:flex;flex-wrap:wrap;gap:.08rem;margin:.12rem 0}
+
+.scard__mercenary{position:absolute;top:.55rem;left:.06rem;z-index:5;background:#614825;color:#ffe3a3;border:1px solid #d8ad65;padding:.02rem .06rem;border-radius:.04rem;font-size:.1rem}

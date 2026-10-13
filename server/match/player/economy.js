@@ -1,3 +1,4 @@
+import { WISDEL, rally, leaderRefresh, applyLeaderDiscount, operatorKey } from './customLeaders.js';
 // server/match/player/economy.js — PlayerState methods: the economy — funds, spending (onSpend), prep-side bond layer
 // gains (clamped by layerGainRoom), the shop (onPrice prices, copy-weighted rolls from the shared pool plus the player's
 // own 自选 stock — player/diy.js —, freeze) and its intents: g.buy, g.refresh, g.freeze, g.levelUp, g.sell.
@@ -69,6 +70,7 @@ export class PlayerEconomy {
     if (!slot) return 0;
     const ev = { slot, kind: slot.kind, id: slot.id, price: slot.basePrice };
     this.m.dispatch(this, 'onPrice', ev, { quiet: true });
+    if (slot.kind === 'chess') ev.price -= Number(slot.leaderDiscount) || 0;
     const p = Number(ev.price);
     return Number.isFinite(p) ? Math.max(0, Math.round(p)) : slot.basePrice;
   }
@@ -123,6 +125,7 @@ export class PlayerEconomy {
     for (let i = 0; i < nChess; i++) slots.push(keep(oldChess[i], 'chess') ?? this._rollChessSlot());
     for (let i = 0; i < nItem; i++) slots.push(keep(oldItems[i], 'item') ?? this._rollItemSlot());
     this.shop.slots = slots;
+    applyLeaderDiscount(this);
     this.shop.layout = { chess: nChess, item: nItem };
     for (const s of slots) if (s) s.frozen = this.shop.frozen;
     this.dirty();
@@ -175,6 +178,7 @@ export class PlayerEconomy {
     const handFull = this.openHandSlot() < 0;
     // A6000 fork: 海克斯·预备队 — a full hand buys into the 临时整备区 while it has room (temp blocks Ready until resolved)
     const reserve = handFull && Array.isArray(this.augments) && this.augments.includes('aug_reserve') && freeSlot(this.temp) >= 0;
+    const firstOperator = slot.kind === 'chess' && !this.leaderAcquired?.has(operatorKey(this, slot.id));
     let piece;
     if (slot.kind === 'chess') {
       const rec = this.gd.chess(slot.id);
@@ -187,7 +191,7 @@ export class PlayerEconomy {
       if (handFull && !reserve) return fail(ERR.HAND_FULL);
       this.spend(price);
       slot.sold = true;
-      piece = this.acquireChess(slot.id, { source: 'buy', toTemp: reserve });
+      piece = this.acquireChess(slot.id, { source: 'buy', toTemp: reserve, mercenary: !!slot.mercenary });
     } else {
       if (!this.gd.item(slot.id)) return fail(ERR.BAD_TARGET);
       if (handFull && !reserve) return fail(ERR.HAND_FULL);
@@ -195,6 +199,7 @@ export class PlayerEconomy {
       slot.sold = true;
       piece = this.acquireItem(slot.id, { source: 'buy', toTemp: reserve });
     }
+    if (piece && firstOperator && this.bandId === WISDEL) rally(this);
     this.stats.buys++;
     this.round.buys++;
     this.m.dispatch(this, 'onBuy', { piece, slot, price, kind: slot.kind });
@@ -223,6 +228,7 @@ export class PlayerEconomy {
     this.rollShop({ keepFrozen: false });
     this.stats.refreshes++;
     this.round.refreshes++;
+    leaderRefresh(this);
     this.m.dispatch(this, 'onRefresh', lucky ? { slots: this.shop.slots, free, price, lucky } : { slots: this.shop.slots, free, price });
     this._afterSpend(price, 'refresh');
     this.dirty();

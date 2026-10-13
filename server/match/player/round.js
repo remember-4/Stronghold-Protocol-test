@@ -1,3 +1,4 @@
+import { markMercenaryShop } from './customLeaders.js';
 import { repayClosureCredit } from '../../../shared/sarkazCredit.js';
 // server/match/player/round.js — PlayerState methods: the round lifecycle the match calls — startRound (income, pending
 // coins, the shop, summon stacks topped up), endPrep, eliminate (every copy back to the pool), recompute (legality,
@@ -33,6 +34,7 @@ export class PlayerRound {
     // summon stacks removed from temp at the last prep deadline come back (PRTS 卫戍协议/帮助 §手牌区); full hand ⇒ temp
     for (const p of [...this.board.values()]) if (p.kind === 'chess') this.grantTokensFor(p);
     this.rollShop({ keepFrozen: true });
+    markMercenaryShop(this);
     this.shop.frozen = false;
     for (const s of this.shop.slots) if (s) s.frozen = false;
     this.recompute();

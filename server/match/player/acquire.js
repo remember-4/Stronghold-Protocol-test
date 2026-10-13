@@ -1,3 +1,4 @@
+import { rememberOperator } from './customLeaders.js';
 // server/match/player/acquire.js — PlayerState methods: gains and merges — copy counts, acquireChess (hand, overflow
 // temp, the no-room rule) and the chess merge (3 copies → the elite, on a consumed deployed copy's tile or in the hand;
 // the reward offer), promotion, transformation (突变细胞: a destroy, then a gain), item upgrades, reward / item offers,
@@ -57,7 +58,7 @@ export class PlayerAcquire {
    * @param {string} chessId
    * @param {{ source?: string, toTemp?: boolean, fromPool?: boolean, silent?: boolean }} [opts]
    */
-  acquireChess(chessId, { source = 'grant', toTemp = false, fromPool = true, silent = false } = {}) {
+  acquireChess(chessId, { source = 'grant', toTemp = false, fromPool = true, silent = false, mercenary = false } = {}) {
     const rec = this.gd.chess(chessId);
     // a DIY slot is only ever this player's own 自选 piece: a slot it has not filled has no body (甄选干员) to gain
     if (!rec || (rec.isDiy && !rec.diyFor)) return null;
@@ -65,7 +66,7 @@ export class PlayerAcquire {
     const need = rec.isGolden ? this.gd.goldenCopies : 1;
     // the shared pool, or this player's stock of a slotted 自选 piece (player/diy.js poolOf)
     const taken = fromPool ? this.poolOf(base).take(base, need) : 0;
-    const piece = this.newPiece('chess', chessId, { poolCopies: taken });
+    const piece = this.newPiece('chess', chessId, { poolCopies: taken, meta: { mercenary: !!mercenary } });
     this.round.gainedChess++;
     let owned = piece;
     if (!rec.isGolden && this.completesChessMerge(chessId)) {
@@ -80,6 +81,7 @@ export class PlayerAcquire {
       }
     }
     this.recompute();
+    rememberOperator(this, chessId);
     if (!silent) this.m.dispatch(this, 'onGain', { piece: owned, kind: 'chess', source });
     this.recompute();
     return owned;
@@ -123,7 +125,7 @@ export class PlayerAcquire {
     // a new piece: this round's per-piece counters start at 0, none is carried over from the copies — a newly merged
     // elite 拉普兰德 is a new 拉普兰德 and fires +8 on its own first manual refresh this round (GitHub #169; the owner's
     // decision of 2026-10-06; pieceRoundCount)
-    const elite = this.newPiece('chess', goldenId, { poolCopies: copies });
+    const elite = this.newPiece('chess', goldenId, { poolCopies: copies, meta: { mercenary: consumed.some(l => l.piece.meta?.mercenary) } });
     const deployed = consumed.filter((l) => l.key && !this.board.has(l.key)).map((l) => ({ key: l.key, dir: pieceDir(l.piece) }));
     const toTile = (t) => { elite.dir = parseDir(t.dir) || 'RIGHT'; this.board.set(t.key, elite); return 'board'; };
     const tile = mergeTile(deployed, (r, c) => this._legal(elite, r, c));

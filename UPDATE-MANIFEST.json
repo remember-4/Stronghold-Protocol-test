@@ -1,25 +1,35 @@
 {
-  "baseCommit": "bd868f558c3c36d0e846ee1793d3595eaf60eada",
-  "files": {
-    "data/bonds.json": "a47449e1507168e3997b90bf96124ca2687c311d4b032f773f93082f91be3fc9",
-    "data/chess.json": "6e9763fba91446fba288385b183d04dfa4fa7ec3f3915dfdfdc505a8f28aaddf",
-    "data/config.json": "064a4525f6bc46173c06381dede02df1f890af4b6ed366b9a9eded4ba31a1847",
-    "data/garrisons.json": "e7fa69385ae9aa0f0bd888b4d756595934c7d3a2671527c0fbd2613182c0fc9b",
-    "docs/updates/sarkaz-rebalance-20261012.md": "84feb3a1cafd880424190009e49d77487a6b240c8c9b81c95a1aac39266c58fb",
-    "public/js/ui/detailPanel.js": "dbd790542b74fc97d2da1c5411821eb13aa13a5e49adf565974d30539a5c90a9",
-    "public/js/ui/gameLogic/shop.js": "f5b2bda918d58ea17e4fb2e8eb150a5e66afd0367757f18773a5ebdb7537400a",
-    "server/match/gamedata.js": "25deab17f9793c56a55bfcf0aae7d8505fd04e901b712d63a593aad9692a9e17",
-    "server/match/player/prep.js": "e8ff4ae84c673336aa036edccf1ae946b38175e47285bbbee9fb590c6736ea6a",
-    "server/match/pool.js": "9393e8a96c6048089ab2c6bae2e8ed931d3d102bb22c45aa40139fcccf3d2c69",
-    "server/sim/content/bonds/sarkaz.js": "50af9c860a2683ae64e4d802a7375b0590bb3ef179643959c6abc2a76cc4e903",
-    "server/sim/content/garrisons/battle.js": "1bbc6c903bd8c120d79d00d62fc432f804ff334371b365b2da5e25ccb8a7d59a",
-    "test/sarkaz-rebalance.test.js": "aa6fa898d4c399a1df95ddf0716989f960dab9121b6b692744ce52b696f3d42e",
-    "test/sarkaz.test.js": "23695c7548d438b81ca0c7c6761350a5a179540dc1bab6132d02a5a2b55cca7d",
-    "tools/custom/sarkaz-roster.mjs": "18f3952ffa563821ee2dd8c6ee24f052c3957247a0e9b2e79a14b62bb060d8c9"
-  },
+  "baseCommit": "5face81643823b806fd9b8f42613f66a068d257c",
   "tests": {
-    "total": 90,
-    "passed": 90,
-    "failed": 0
+    "total": 104,
+    "passed": 104
+  },
+  "files": {
+    "data/assets.json": "594b55e3918d7c18083e4ac0068aec3133011db5092b658b584db9d944f34ac5",
+    "data/bands.json": "5a6ff86288c8896d362cd1da40e0bdc020fdf88620e026f3561b780e5c7ab7ee",
+    "data/bonds.json": "f01dc539a08d5499a4de0636942facc8080d590802adc107696c3b0c8e5d3fc6",
+    "docs/updates/custom-sarkaz-leaders-20261013.md": "fe44a015b0071b43ab234086365a451b5f99fbb6f3a12d55d1df0922531f7d55",
+    "public/assets/band/band_custom_hodrer.png": "dfd4229f207dd89f560b735faaef80fdb0733dfeb318d92602d24f928af1d285",
+    "public/assets/band/band_custom_theresa.png": "2d17ad043c264872ac2c8b7b9c65a9b72be45a442ca82989071c7d7fc22585f2",
+    "public/assets/band/band_custom_wisdel.png": "147472d536f30e63d047ce075db692d5c099d83d528d55314b13ab4648d41fe9",
+    "public/css/components.css": "8188103bca1539d4b60d7d484117e86ed54a4212bead5ada757d933db2f59965",
+    "public/i18n/en.json": "720303252663d0f235d32d893b82d4acecf7a212188c65b4028fce22cb731e38",
+    "public/i18n/ja.json": "260c5a774d2ba8cec6d92b2054056eeeebc832162cc7a51db8b079b9e6038d8b",
+    "public/i18n/ko.json": "83433b82a3190d8778c30949fbe4d2366f13ebb042c1e641d65ff9ef08d34d1e",
+    "public/i18n/zh-TW.json": "b9c78018a28f7ec7177dddebadb4c087704367767612a69678c3fc6b9babc49e",
+    "public/js/ui/detailPanel.js": "1f01f89a4e00e32cf91f5a33ca62adf0de516db50ec50a1e2afc1f103f074713",
+    "public/js/ui/effectsList.js": "e7804d218c1a32620291e095440ff06d406905992a20e98e9570c68747e8b474",
+    "public/js/ui/gameLogic/placement.js": "d8b090c07a7e4533c3d8966f6c8344d7ae625c6934d2ac0a2f4affcf381cb378",
+    "public/js/ui/shopBar.js": "faf63455245af0124304326726d3b3739e04775ed382e32ca757bee0fd2305e7",
+    "server/match/player/acquire.js": "ea9fb49d36861efcec172d0b47192912bb138de67883b9dfd8fb11f7a5f9785a",
+    "server/match/player/basics.js": "7d97f25b2a3fc65682aaee82d58338ffc85d4da032db304d47d44e113fb1d6a3",
+    "server/match/player/customLeaders.js": "54b72a8bf1c6cd4ded6f870a544187e7d09d8f884eac796f88f5b9f299d899c6",
+    "server/match/player/economy.js": "ad8c46ce77863fd2d2eb139a4b7a44efc649ff4d504f996dd5cb485aea52c109",
+    "server/match/player/placement.js": "2e88104f3aca7bffb214b1339441d68c2999f206c6780844d1dc9daf9c161d66",
+    "server/match/player/round.js": "cacecf6263b856aec60f38b30abd40410736bd93a5a20fdae134465df1a7804c",
+    "server/match/player/views.js": "11dabf977389abe47e88639df29fe91aebff5bbbe1a2ee8c2fbf7de2b8bde559",
+    "server/sim/content/bonds/sarkaz.js": "1ca3e91e15d2f145ef0919996c7730b0301ea4ca52dc9b1ac82fc6fb467103bb",
+    "test/custom-leaders.test.js": "af757d9d3b39fd4f88021d69cc18bfa90a8aa2eeabeea1ce8428c2928ed758d9",
+    "tools/custom/sarkaz-roster.mjs": "e1820bed5433bf28bf04f2fd2d75605238e23ef5241b566b0c9d4de4ea3126e0"
   }
 }

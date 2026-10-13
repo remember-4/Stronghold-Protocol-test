@@ -14,6 +14,7 @@ export class PlayerViews {
     const rec = p.kind === 'item' ? this.gd.item(p.id) : p.kind === 'token' ? this.gd.token(p.id) : this.gd.chess(p.id);
     const v = {
       uid: p.uid,
+      mercenary: !!p.meta?.mercenary,
       kind: p.kind,
       id: p.id,
       golden: !!(rec && rec.isGolden),
@@ -29,7 +30,7 @@ export class PlayerViews {
   effectsView() {
     const out = [];
     const band = this.bandId ? this.gd.band(this.bandId) : null;
-    if (band) out.push({ id: band.effectId || band.bandId, name: band.effectName || band.name, desc: band.desc || '', iconKind: 'band', iconId: band.iconId || band.bandId });
+    if (band) out.push({ id: band.effectId || band.bandId, name: band.effectName || band.name, desc: band.desc || '', counter: this.bandId === 'band_custom_wisdel' ? this.counters.wisdelRally || 0 : undefined, counterText: this.bandId === 'band_custom_wisdel' ? `${this.counters.wisdelRally || 0}/6 号召 · 待用折扣 ${this.counters.wisdelDiscounts || 0}` : undefined, iconKind: 'band', iconId: band.iconId || band.bandId });
     for (const e of this.effects) {
       if (e.hidden) continue;
       const v = { id: e.id, name: e.name || e.id, desc: e.desc || '', iconKind: e.iconKind || 'choice', iconId: e.iconId || e.id };
@@ -55,7 +56,7 @@ export class PlayerViews {
   }
 
   privateView() {
-    const slots = this.shop.slots.map((s) => (s ? { kind: s.kind, id: s.id, price: this.priceOf(s), basePrice: s.basePrice, sold: !!s.sold, frozen: !!s.frozen } : null));
+    const slots = this.shop.slots.map((s) => (s ? { kind: s.kind, id: s.id, price: this.priceOf(s), basePrice: s.basePrice, sold: !!s.sold, frozen: !!s.frozen, mercenary: !!s.mercenary } : null));
     const offer = this.offers[0] || null;
     const free = this.shop.freeRefreshes > 0;
     const board = [];

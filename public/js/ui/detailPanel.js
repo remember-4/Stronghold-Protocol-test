@@ -422,6 +422,7 @@ export function ChessDetail({ chess, piece, unit, snapHp, editable, onSell, bond
       <div class="dhead__info">
         <div class="dhead__chips">
           <${TierChip} tier=${c.tier} golden=${golden} size="lg" />
+          ${piece?.mercenary ? html`<span class="dtag-elite">${t('雇佣兵')}</span>` : null}
           ${golden ? html`<span class="dtag-elite">${t('精锐')}</span>` : null}
           ${piece?.kind === 'token' ? html`<span class="dtag-token">${t('召唤物')}</span>` : null}
           ${si ? html`<span class="dtag-standin" data-standin=${si.charId} title=${standInTip(si, c.name)}>${standInLabel(si)}</span>` : null}

@@ -39,7 +39,7 @@ export function withEnemyBuffs(list, ids) {
  * sends the same Chinese text as `counterText` beside the count; a multi-round card has no count).
  * @param {{ counter?: number|null }} e
  */
-export const bountyCounterText = (e) => (e.counter == null ? t('之后的每场作战') : t('还剩 {left} 场作战', { left: e.counter }));
+export const bountyCounterText = (e) => (e.iconKind === 'band' && e.counterText ? e.counterText : e.counter == null ? t('之后的每场作战') : t('还剩 {left} 场作战', { left: e.counter }));
 
 /** Data files whose records an effect entry copies its name / description from (by its id or icon id). */
 const SOURCES = ['effects', 'bands', 'items', 'garrisons'];
