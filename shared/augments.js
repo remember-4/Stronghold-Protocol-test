@@ -274,7 +274,10 @@ const GENERIC_RARITY = Object.freeze({
   // 红
   aug_allin: 6, aug_chosen: 6,
 });
-/** 专属强化: the table's 品质 白 / 金 / 彩 (tiers I / II / III) → 白 / 金 / 红. 职业专精: tiers 1 / 2 / 3 → 绿 / 紫 / 金. */
+/**
+ * 专属强化: the table's 品质 白 / 金 / 彩 (tiers I / II / III) → 白 / 金 / 红 (II 紫 since the friend's revision of 2026-10-14:
+ * hexRevision.js CHANGES gives each its rarity). 职业专精: tiers 1 / 2 / 3 → 绿 / 紫 / 金.
+ */
 const EXCLUSIVE_RARITY = Object.freeze({ 1: 1, 2: 5, 3: 6 });
 const CLASS_RARITY = Object.freeze({ 1: 2, 2: 4, 3: 5 });
 

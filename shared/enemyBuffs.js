@@ -35,7 +35,7 @@ export const EB_TIERS = Object.freeze([1, 2, 3, 4, 5, 6]);
 export const EB_TIER_NAME = Object.freeze({ 1: N_('白'), 2: N_('绿'), 3: N_('蓝'), 4: N_('紫'), 5: N_('金'), 6: N_('彩') });
 
 // Six visible rarities; tier stays the legacy strength band used by blind-box temporary pools.
-export const ENEMY_SET_NAMES = Object.freeze({guard:'坚壁', swift:'突进', assault:'强攻', control:'压制', disruption:'干扰', special:'特训', boss:'首领'});
+export const ENEMY_SET_NAMES = Object.freeze({guard:N_('坚壁'), swift:N_('突进'), assault:N_('强攻'), control:N_('压制'), disruption:N_('干扰'), special:N_('特训'), boss:N_('首领')});
 const RARITY_GROUPS = [
  ['eb_swift','eb_range','eb_revenge','eb_trueres','eb_dash','eb_logistics','eb_inflation','eb_jinx','eb_layertax','eb_antisummon'],
  ['eb_vigor','eb_res','eb_evasion','eb_armor','eb_fury','eb_enrage','eb_regen','eb_backup','eb_blink','eb_purify','eb_elitebreak','eb_thief','eb_standin','eb_reverse','eb_redeploy','eb_jam','eb_noheal','eb_artsward'],

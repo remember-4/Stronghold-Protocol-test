@@ -57,7 +57,7 @@ const BATTLE = {
   aug_u_escape(b,ps,id) {
     b.on('damaged',({target:u,amount,type})=>{
       if(!own(u,ps.playerId)||type==='element'||!u.alive||u.hp<=0||u.hp/u.s.maxHp>.35||u.hp+amount<=u.s.maxHp*.35)return;
-      const unblock=()=>{if(u.alive&&u.deployed)b.addBuff(u,{key:`${key(id)}:unblock`,flags:{unblockable:true},duration:10,refresh:'replace'});};
+      const unblock=()=>{if(u.alive&&u.deployed)b.addBuff(u,{key:`${key(id)}:unblock`,flags:{noBlock:true},duration:10,refresh:'replace'});}; // (阻挡数 0: noBlock — `unblockable` is an enemy's 不可阻挡)
       b.addBuff(u,{key:key(id),shield:u.s.maxHp*.3,duration:5,onRemove:unblock,onExpire:unblock});
     });
   },

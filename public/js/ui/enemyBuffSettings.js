@@ -7,7 +7,7 @@
 
 import { useState } from '../../vendor/hooks.module.js';
 import { html, Button, Icon, MicroLabel, Modal } from './components.js';
-import { t, tc } from '../../../shared/i18n.js';
+import { t, tc, N_ } from '../../../shared/i18n.js';
 import { EB_TIERS, EB_TIER_NAME, EB_WEIGHT_MAX, CONFIGURABLE_ROUNDS, EB_SETTINGS_DEFAULT, enemyBuffSettings } from '../../../shared/enemyBuffs.js';
 
 const cx = (...p) => p.flat().filter(Boolean).join(' ');
@@ -76,10 +76,10 @@ export function EnemyBuffEditor({ value, onChange, disabled = false }) {
     <p class="ebset__note">${t('双方同步需要先开启我方同步。同一轮按同一品质生成候选；最高档我方红对应敌方彩。双方同步时使用我方品质概率，敌方权重不参与；首次禁彩会把共同最高档降为金。')}</p>
     <p class="ebset__note">${t('逐回合选择是否新增强化；关闭某回合不会移除之前获得的强化。第14、15回合仅在进入对应战斗时生效。')}</p>
     <div class="ebset__presets">
-      ${[['默认安排', { playerRounds: EB_SETTINGS_DEFAULT.playerRounds, enemyRounds: EB_SETTINGS_DEFAULT.enemyRounds, on: true }],
-        ['每回合双方', { playerRounds: CONFIGURABLE_ROUNDS, enemyRounds: CONFIGURABLE_ROUNDS, on: true }],
-        ['仅我方', { playerRounds: CONFIGURABLE_ROUNDS, enemyRounds: [] }],
-        ['全部关闭', { playerRounds: [], enemyRounds: [] }]].map(([label, patch]) => html`<${Button} variant="ghost" size="sm" disabled=${disabled} onClick=${() => set(patch)}>${t(label)}<//>`)}
+      ${[[N_('默认安排'), { playerRounds: EB_SETTINGS_DEFAULT.playerRounds, enemyRounds: EB_SETTINGS_DEFAULT.enemyRounds, on: true }],
+        [N_('每回合双方'), { playerRounds: CONFIGURABLE_ROUNDS, enemyRounds: CONFIGURABLE_ROUNDS, on: true }],
+        [N_('仅我方'), { playerRounds: CONFIGURABLE_ROUNDS, enemyRounds: [] }],
+        [N_('全部关闭'), { playerRounds: [], enemyRounds: [] }]].map(([label, patch]) => html`<${Button} variant="ghost" size="sm" disabled=${disabled} onClick=${() => set(patch)}>${t(label)}<//>`)}
     </div>
     <div class="ebset__schedule" role="group" aria-label=${t('每回合强化安排')}>
       <b>${t('回合')}</b><b>${t('我方海克斯')}</b><b>${t('敌方强化')}</b>

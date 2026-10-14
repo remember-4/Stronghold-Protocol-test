@@ -7,8 +7,9 @@ import { burstEventMatches } from '../../elementState.js';
 //   ADD_BOND            grants `give_garrison_id` to other operators before the first deployment (targets parsed from
 //                       the text: 身前一格 / 身前一格【X】/ 自身和身前一格 / 同一行最右边 / 所有【X】). A unit owns a garrison id
 //                       at most once (耀骑士临光 already carries the 144/159 it grants to itself). A granted trait keeps
-//                       its data cap like a native one: 华法琳's garrison_95 stops at 7 / 14 layers per battle (PRTS 下半
-//                       3月27日更新#2: 「从 初始12/精锐24 降低至 初始7/精锐14」; GitHub #175, PR #192 by @kukiC).
+//                       its data cap like a native one: 华法琳's garrison_95 stopped at 7 / 14 layers per battle (PRTS 下半
+//                       3月27日更新#2: 「从 初始12/精锐24 降低至 初始7/精锐14」; GitHub #175, PR #192 by @kukiC); the
+//                       萨卡兹 roster grants garrison_sarkaz_warfarin_grant instead, 10 / 20 (tools/custom/sarkaz-roster.mjs).
 //                       A6000 fork, 海克斯「前后呼应」(aug_echo; reachOf): 华法琳 72 / 寒芒克洛丝 73 / 凛御银灰 126 / 耀骑士临光
 //                       145 · 160 — "身前一格" also the second tile in front (凛御银灰's still a 【谢拉格】 one), whoever
 //                       stands on the first.

@@ -551,8 +551,22 @@ export class DataSource {
   rawEnemy(key) {
     return this.raw.enemies[key] ?? this.raw.enemies['enemy_' + key] ?? this.raw.enemies[String(key).replace(/^enemy_/, '')] ?? this.fallback?.rawEnemy(key) ?? null;
   }
-  /** A token record: data/tokens.json, else the 自选 picks' summons (data/backups.json `tokens`). */
-  rawToken(id) { return this.raw.tokens[id] ?? this.fallback?.rawToken(id) ?? this.rawBackups()?.tokens?.[id] ?? null; }
+  /**
+   * A token record: data/tokens.json, else the 自选 picks' summons (data/backups.json `tokens`). A summon of both — an
+   * operator that is a chess and a 自选 pick (酒神 since the friend's 元素: tools/custom/chess-token.mjs) — is the chess
+   * record with the 自选 owner forms' variants added (cached), so a 自选 piece finds its form either way.
+   */
+  rawToken(id) {
+    const r = this.raw.tokens[id] ?? this.fallback?.rawToken(id) ?? null;
+    const diy = this.rawBackups()?.tokens?.[id] ?? null;
+    if (!r || !diy?.variants || r === diy) return r ?? diy;
+    let m = (this._mixedTokens ??= new Map()).get(id);
+    if (!m || m.from !== r) {
+      m = { from: r, rec: { ...r, variants: { ...r.variants, ...diy.variants } } };
+      this._mixedTokens.set(id, m);
+    }
+    return m.rec;
+  }
   rawStage(id) { return this.raw.stages[id] ?? this.fallback?.rawStage(id) ?? null; }
   rawWave(id) { return this.raw.waves[id] ?? this.fallback?.rawWave(id) ?? null; }
   /** data/backups.json (`{ units, diy }`) of this source or its fallback, or null. */

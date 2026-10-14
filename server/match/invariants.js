@@ -1,4 +1,3 @@
-import { fundsFloor } from '../../shared/sarkazCredit.js';
 // server/match/invariants.js — engine invariants (DESIGN §11) as a non-throwing check. Used by the test harness
 // (i18n-ignore-file: developer reports in English with the game's terms, never shown to players — docs/I18N.md)
 // (test/match/harness.js checkInvariants asserts the list is empty) and by tools/matchrun.mjs --check sweeps.
@@ -54,7 +53,9 @@ export function collectViolations(m, { limit = 25 } = {}) {
     // the player's view of the data (its slotted 自选 slots are its operators) and the copies its 自选 pieces hold
     const pgd = ps.gd || gd;
     const diyHeld = new Map();
-    if (!Number.isInteger(ps.funds) || ps.funds < fundsFloor(ps)) fail(`${id}: funds ${ps.funds}`);
+    // (可露希尔's credit, shared/sarkazCredit.js: down to −2 in a prep — a debt outlives a sold elite 可露希尔 — and settled
+    // at the prep end)
+    if (!Number.isInteger(ps.funds) || ps.funds < (m.phase === PHASE.PREP ? -2 : 0)) fail(`${id}: funds ${ps.funds}`);
     if (!Number.isInteger(ps.pendingFunds) || ps.pendingFunds < 0) fail(`${id}: pendingFunds ${ps.pendingFunds}`);
     if (!Number.isFinite(ps.lp)) fail(`${id}: lp ${ps.lp}`);
     if (ps.alive && m.phase !== PHASE.SETTLE && ps.lp <= 0 && m.teamLp == null && m.round > 0 && ps.bandId) fail(`${id}: alive with lp ${ps.lp}`);

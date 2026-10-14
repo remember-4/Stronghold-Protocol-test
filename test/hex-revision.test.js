@@ -53,10 +53,11 @@ test('heavy hit, dualstrike, crit and arts healing use actual battle damage',()=
  x=setup(['aug_u_dualstrike']);hp=x.e.hp;x.b.emit('attack',{attacker:x.u,targets:[x.e],isSkill:false});near(hp-x.e.hp,x.u.s.atk*.4);
  x=setup(['aug_u_soul_siphon','aug_u_arts_juice']);x.u.hp-=500;x.b.rng=()=>0;hp=x.u.hp;near(hit(x.b,x.u,x.e,100,'arts',{isAttack:true}),200);near(x.u.hp-hp,26);assert.deepEqual(x.b.errors,[]);
 });
+// (A6000 fork review, 2026-10-14: 阻挡数 0 is the operator's noBlock — `unblockable` is an enemy's 不可阻挡, inert on an operator)
 test('escape triggers on threshold crossing: depletion/expiry unblock, healing above threshold rearms',()=>{
  for(const deplete of [false,true]){const {h,b,u,e}=setup(['aug_u_escape']);u.hp=u.s.maxHp*.35+1;hit(b,e,u,2,'true');assert(u.findBuff('augment:aug_u_escape'));
  if(deplete)hit(b,e,u,u.s.maxHp*.3,'true');else h.run(5.1);
- assert(u.s.flags.unblockable);h.run(10.1);assert(!u.s.flags.unblockable);assert(!u.findBuff('augment:aug_u_escape'));u.hp=u.s.maxHp*.5;hit(b,e,u,u.s.maxHp*.2,'true');assert(u.findBuff('augment:aug_u_escape'));assert.deepEqual(b.errors,[]);}
+ assert(u.s.flags.noBlock);h.run(10.1);assert(!u.s.flags.noBlock);assert(!u.findBuff('augment:aug_u_escape'));u.hp=u.s.maxHp*.5;hit(b,e,u,u.s.maxHp*.2,'true');assert(u.findBuff('augment:aug_u_escape'));assert.deepEqual(b.errors,[]);}
 });
 test('death cry does not stack when several allies fall; new incoming enemies do not inherit it',()=>{
  const {h,b,u,e}=setup(['aug_u_deathcry']);b.emit('death',{unit:u,reason:'killed'});b.emit('death',{unit:u,reason:'killed'});near(e.s.dmgTakenMul,1.2);const e2=h.spawn('e',{pos:[10,6]});near(e2.s.dmgTakenMul,1);

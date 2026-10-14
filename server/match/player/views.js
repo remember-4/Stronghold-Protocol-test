@@ -30,7 +30,7 @@ export class PlayerViews {
   effectsView() {
     const out = [];
     const band = this.bandId ? this.gd.band(this.bandId) : null;
-    if (band) out.push({ id: band.effectId || band.bandId, name: band.effectName || band.name, desc: band.desc || '', counter: this.bandId === 'band_custom_wisdel' ? this.counters.wisdelRally || 0 : undefined, counterText: this.bandId === 'band_custom_wisdel' ? `${this.counters.wisdelRally || 0}/6 号召 · 待用折扣 ${this.counters.wisdelDiscounts || 0}` : undefined, iconKind: 'band', iconId: band.iconId || band.bandId });
+    if (band) out.push({ id: band.effectId || band.bandId, name: band.effectName || band.name, desc: band.desc || '', counter: this.bandId === 'band_custom_wisdel' ? this.counters.wisdelRally || 0 : undefined, discounts: this.bandId === 'band_custom_wisdel' ? this.counters.wisdelDiscounts || 0 : undefined, counterText: this.bandId === 'band_custom_wisdel' ? `${this.counters.wisdelRally || 0}/6 号召 · 待用折扣 ${this.counters.wisdelDiscounts || 0}` : undefined, iconKind: 'band', iconId: band.iconId || band.bandId }); // i18n-ignore: older clients (ui/effectsList.js builds it from counter + discounts)
     for (const e of this.effects) {
       if (e.hidden) continue;
       const v = { id: e.id, name: e.name || e.id, desc: e.desc || '', iconKind: e.iconKind || 'choice', iconId: e.iconId || e.id };

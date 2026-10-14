@@ -23,6 +23,7 @@ export class MatchUnite {
     this._defaultWatch();
     this.markPublic();
     this.tickerText(msg('联防阶段：{names} 迎战突破防线的敌人', { names: plan.helpers.map((p) => p.name) }), FLOW_TICKER_PRIORITY);
+    this.teamCoverFlags(plan, { announce: true }); // 还手·不兜底 (2026-10-11): the ticker lines
     this._uniteLeftKey = null;
     this.runner = new FieldRunner(this, this.fields, {
       onTick: (runner) => this._uniteTick(runner),
@@ -47,6 +48,7 @@ export class MatchUnite {
    */
   _uniteOpts(plan, limit) {
     const { wave, players } = uniteBattleOpts(this, plan, limit);
+    const grudgeCover = this.teamCoverFlags(plan); // 还手·不兜底 (2026-10-11)
     return {
       seed: deriveSeed(this.seed, `u:${this.round}`),
       kind: 'unite',
@@ -59,7 +61,8 @@ export class MatchUnite {
       spawns: this._sanitizeSpawns(wave.spawns),
       routes: wave.routes,
       sharedBoss: null,
-      flags: this.battleFlags({ layerGainsEnabled: false, ...this.gd.dp }),
+      // + 还手·不兜底: a helper's damage to the enemies of a leaker it holds grudges against
+      flags: { ...this.battleFlags({ layerGainsEnabled: false, ...this.gd.dp }), ...(grudgeCover ? { grudgeCover } : {}) },
       fieldId: 'u',
       // leaked enemies re-enter with the stats they had: the round template's stat overrides apply again
       enemyOverrides: this.wave && this.wave.overrides ? this.wave.overrides : {},
@@ -82,6 +85,7 @@ export class MatchUnite {
     }
     this.markPublic();
     this.tickerText(msg('联防阶段：{names} 迎战突破防线的敌人', { names: plan.helpers.map((p) => p.name) }), FLOW_TICKER_PRIORITY);
+    this.teamCoverFlags(plan, { announce: true }); // 还手·不兜底 (2026-10-11): the ticker lines
   }
 
   _finishUniteClient() {

@@ -25,8 +25,10 @@ export function skinOptions(manifest, id) {
     .map(([skinId, s]) => ({ ...s, id: skinId }));
 }
 
+/** The outfit shown for `id`: its pick, else the `'*'` pick (every operator without one), else the rightmost outfit;
+ *  '__original__' = the original appearance (an unknown pick falls back to the rightmost too). */
 export function selectedSkin(manifest, id, choices = skinStore.get().choices) {
-  const skinId = choices?.[baseId(id)];
+  const skinId = choices?.[baseId(id)] ?? choices?.['*'];
   const options = skinOptions(manifest, id);
   return skinId === '__original__' ? null : skinId ? options.find((s) => s.id === skinId) || options.at(-1) || null : options.at(-1) || null;
 }

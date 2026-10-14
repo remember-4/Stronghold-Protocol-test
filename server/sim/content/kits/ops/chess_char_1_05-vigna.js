@@ -1,17 +1,20 @@
-// server/sim/content/kits/ops/chess_char_1_05-vigna.js — 红豆 (char_290_vigna) kit, tier 1 (hidden).
+// server/sim/content/kits/ops/chess_char_1_05-vigna.js — 红豆 (char_290_vigna) kit, tier 1.
 // Conventions of the tier-1 kits: ../shared/tier1.js; kit contract and rules: ../README.md.
 
-import { num, talentBb, traitBb, onHitBy, batMod } from '../shared/tier1.js';
+import { num, talentBb, traitBb, onHitBy, batMod, skillBbOf } from '../shared/tier1.js';
 
 export default {
   // ---------------------------------------------------------------------------------------------------------------
-  // 1_05 红豆 (hidden) 槌音: base attack time +base_attack_time s, ATK +atk. 蛮力穿刺: each attack prob1 (prob2 while the skill
+  // 1_05 红豆 槌音: base attack time +base_attack_time s, ATK +atk. 蛮力穿刺: each attack prob1 (prob2 while the skill
   // runs) for ATK +atk on that attack. Elite module (CHG-Y): vs enemies below hp_ratio HP, ATK ×atk_scale.
+  // Alternate S1 攻击力强化·β型: ATK +atk for its duration (蛮力穿刺 rolls prob2 while it runs, as with any skill).
   chess_char_1_05_a: (bb, chess) => {
     const t = talentBb(chess, 0);
     const tb = traitBb(chess);
+    const s1 = skillBbOf(chess, 'skchr_vigna_1');
     return {
       skill: { kind: 'duration', mods: { atkPct: num(bb.atk), batPct: batMod(bb.base_attack_time, chess) } },
+      skills: { skchr_vigna_1: { kind: 'duration', mods: { atkPct: num(s1.atk) } } },
       talents: [{ install(battle, unit) {
         const key = 'vigna:proc';
         battle.on('beforeAttack', (ctx) => {

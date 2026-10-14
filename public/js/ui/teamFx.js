@@ -94,6 +94,22 @@ export const TEAM_ACTIONS = Object.freeze([
   Object.freeze({ id: AUG_CHEER, key: 'cheer', label: N_('加油') }),
   Object.freeze({ id: AUG_SELL, key: 'sell', label: N_('卖队友') }),
 ]);
+/**
+ * 还手 (the user, 2026-10-11): on the row of a teammate the player holds `cost`+ grudges against, no 海克斯 needed —
+ * the same g.augAction { id, target } (server/match/match/augments.js teamRetaliate; its numbers GRUDGE_DEBT_FUNDS /
+ * GRUDGE_TRIP_PCT, kept equal here).
+ */
+export const RV_DEBT = 'aug_rv_debt';
+export const RV_TRIP = 'aug_rv_trip';
+export const REVENGE_ACTIONS = Object.freeze([
+  Object.freeze({ id: RV_DEBT, key: 'debt', label: N_('讨债'), cost: 1, tip: N_('花 1 点仇：从他那里拿走 {n} 资金'), params: Object.freeze({ n: 1 }) }),
+  Object.freeze({ id: RV_TRIP, key: 'trip', label: N_('使绊子'), cost: 2, tip: N_('花 2 点仇：他本回合自己那场战斗里，干员造成的伤害 −{pct}%'), params: Object.freeze({ pct: 10 }) }),
+]);
+/** 还手·不兜底: per grudge (at most GRUDGE_COVER_MAX) a helper's damage to his leaked enemies in a 联防 (server: GRUDGE_COVER_PCT). */
+const COVER_PCT = 10;
+const COVER_MAX = 2;
+/** 记仇的互动: the LP floor at most this much lower (server: GRUDGE_FLOOR_MAX). */
+const FLOOR_MAX = 2;
 
 // ---- icons -----------------------------------------------------------------------------------------------------------
 
@@ -208,6 +224,14 @@ export const KIND_FX = Object.freeze({
   equalize: { glyph: 'coin', tone: 'gold', label: N_('均贫富'), aug: 'aug_equalize', holder: null },
   splitBill: { glyph: 'coin', tone: 'gold', label: N_('公摊'), aug: 'aug_split_bill', holder: 'to' },
   usurp: { glyph: 'crown', tone: 'gold', label: N_('篡位'), aug: 'aug_usurp', holder: null },
+  // 记仇的互动 (2026-10-11): a 损人利己 take settled one of the taker's grudges (from → to), two players' 血仇 (once a pair)
+  revenge: { glyph: 'anger', tone: 'red', label: N_('报复'), aug: null, holder: null },
+  feud: { glyph: 'anger', tone: 'blood', label: N_('血仇'), aug: null, holder: null },
+  // 还手 (2026-10-11): 讨债 from=the debtor to=the avenger amount=funds · 使绊子 from=the avenger to=the tripped amount=% ·
+  // 不兜底 from=the helper to=the leaker amount=% (the 联防's start)
+  debt: { glyph: 'bill', tone: 'red', label: N_('讨债'), aug: null, holder: null },
+  trip: { glyph: 'anger', tone: 'red', label: N_('使绊子'), aug: null, holder: null },
+  noCover: { glyph: 'shield', tone: 'dark', label: N_('不兜底'), aug: null, holder: null },
 });
 /** Every kind the panel draws (an unknown one is kept and ignored). */
 export const TEAM_FX_KINDS = Object.freeze(Object.keys(KIND_FX));
@@ -642,6 +666,21 @@ export function planTeamFx(ev, { pub = null, myId = null } = {}) {
       const n = amt(ev, param(ev, 'funds', 1));
       return [...move('coin', 'gold', 500), num(ev.from, -n, 'funds'), num(ev.to, n, 'funds', { delay: 500 }), sfx('income', { delay: 500, volume: 0.4 })];
     }
+    case 'revenge':
+      return [line(ev.from, ev.to, 'blood', 800), pop(ev.from, 'anger', 'angry', { style: 'text', ms: 1200 }), tag(ev.from, t('报复'), 'red', { delay: 200 })];
+    case 'feud':
+      return [line(ev.from, ev.to, 'blood', 1400), pop(ev.from, 'anger', 'angry', { style: 'text', ms: 1400 }), pop(ev.to, 'anger', 'angry', { style: 'text', ms: 1400 }),
+        banner(t('{a} 和 {b} 结下了血仇', { a: name(ev.from), b: name(ev.to) }), 'red', 'anger', [ev.from, ev.to]), sfx('danger', { volume: 0.4 })];
+    case 'debt': {
+      const n = amt(ev, 2);
+      return [...move('bill', 'red', 600), num(ev.from, -n, 'funds'), num(ev.to, n, 'funds', { delay: 600 }),
+        pop(ev.to, 'anger', 'angry', { style: 'text', ms: 1200 }), tag(ev.to, t('讨债'), 'red', { delay: 200 }), sfx('income', { delay: 600, volume: 0.4 })];
+    }
+    case 'trip':
+      return [line(ev.from, ev.to, 'blood', 900), pop(ev.from, 'anger', 'angry', { style: 'text', ms: 1200 }),
+        tag(ev.to, t('伤害 −{pct}%', { pct: amt(ev, 15) }), 'red', { delay: 300 }), sfx('danger', { volume: 0.3 })];
+    case 'noCover':
+      return [line(ev.from, ev.to, 'blood', 1000), pop(ev.from, 'shield', 'dark', { ms: 1000 }), tag(ev.from, t('不兜底'), 'red', { delay: 200 })];
     default: return [];
   }
 }
@@ -783,7 +822,9 @@ export function teamActionsFor(target, { pub = null, own = null, myId = null } =
   if (!isObj(target) || !target.playerId || target.playerId === myId || target.alive === false) return [];
   if (pub?.phase !== PHASE.PREP || !own || own.alive === false || own.ready) return [];
   const held = new Set((Array.isArray(own.effects) ? own.effects : []).map((e) => (isObj(e) ? e.id : null)).filter(Boolean));
-  return TEAM_ACTIONS.filter((a) => held.has(`augment:${a.id}`));
+  // + 还手 on a teammate the player holds enough grudges against
+  const g = grudgeOf(own.grudges, target.playerId);
+  return [...TEAM_ACTIONS.filter((a) => held.has(`augment:${a.id}`)), ...REVENGE_ACTIONS.filter((a) => g >= a.cost)];
 }
 
 // ---- css, sound ----------------------------------------------------------------------------------------------------------
@@ -930,7 +971,7 @@ export function useTeamFx(pub, myId) {
     actionsFor: (p) => teamActionsFor(p, { pub, own, myId }).map((a) => {
       const def = augmentDef(a.id);
       const done = used.current.get(a.id) === round;
-      return { ...a, label: def ? t(def.name) : t(a.label), tip: done ? t('本回合已发动') : def ? t(def.desc, def.params) : null, used: done, busy: busy === a.id };
+      return { ...a, label: def ? t(def.name) : t(a.label), tip: done ? t('本回合已发动') : def ? t(def.desc, def.params) : a.tip ? t(a.tip, a.params) : null, used: done, busy: busy === a.id };
     }),
     /** g.augAction { id, target } (resolves true on success; a refusal is toasted). */
     runAction: async (id, target) => {
@@ -997,7 +1038,16 @@ export function FxFloats({ list }) {
 /** 「仇 ×N」 beside a teammate's LP: the player's own grudge against them (m.private.grudges). */
 export function GrudgeTag({ n, name }) {
   if (!(n > 0)) return null;
-  return html`<span class="tfx-grudge" title=${t('你对 {name} 记仇 {n} 次', { name, n })}>${t('仇 ×{n}', { n })}</span>`;
+  // 记仇的互动 (2026-10-11; server/match/match/augments.js teamFloor / teamRevengeBonus): every 2 grudges his LP floor
+  // drops 1 (at most FLOOR_MAX), from 3 a take is +1; a revenge settles one grudge
+  const floor = Math.min(FLOOR_MAX, Math.floor(n / 2));
+  const lines = [t('你对 {name} 记仇 {n} 次：你的损人利己海克斯优先找他，每报复一次消一点仇', { name, n })];
+  if (floor > 0) lines.push(t('报复时他的目标生命底线 −{n}', { n: floor }));
+  if (n >= 3) lines.push(t('报复时多拿 1 资金（吸星大法多吸 2 层）'));
+  // 还手 (2026-10-11): 不兜底 by itself, 讨债 / 使绊子 on his row
+  lines.push(t('不兜底：联防时你对他漏过来的敌人伤害 −{pct}%', { pct: COVER_PCT * Math.min(COVER_MAX, n) }));
+  lines.push(n >= 2 ? t('点他的头像可以还手：讨债（1 点仇）、使绊子（2 点仇）') : t('点他的头像可以还手：讨债（1 点仇）'));
+  return html`<span class="tfx-grudge" title=${lines.join('\n')}>${t('仇 ×{n}', { n })}</span>`;
 }
 
 // ---- the layer over the rows ----------------------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 // Rebuild fixed-pool records from the project's existing official operator forms.
 import fs from 'node:fs';
 import { composeUnitRecord } from '../../shared/standIn.js';
+import { addChessToken } from './chess-token.mjs';
 const read=n=>JSON.parse(fs.readFileSync(new URL(`../../data/${n}.json`,import.meta.url)));
 const write=(n,v)=>fs.writeFileSync(new URL(`../../data/${n}.json`,import.meta.url),JSON.stringify(v)+'\n');
 const chess=read('chess'), backups=read('backups'), tokens=read('tokens'), bonds=read('bonds'), gars=read('garrisons');
@@ -10,7 +11,7 @@ for(const [stem,charId,tier,modId,gar] of defs){
  const u=backups.units[charId];if(!u)throw new Error(`Missing ${charId}`);
  for(const gold of [false,true]){
   const id=stem+(gold?'_b':'_a');const template=chess[`chess_char_${tier}_01_${gold?'b':'a'}`];
-  const identity={...template,chessId:id,baseId:stem+'_a',goldenId:stem+'_b',isGolden:gold,tier,isHidden:false,isDiy:false,visible:!gold,chessType:'PRESET',shopSortId:99,
+  const identity={...template,chessId:id,baseId:stem+'_a',goldenId:stem+'_b',isGolden:gold,tier,isHidden:false,isDiy:false,visible:true,chessType:'PRESET',shopSortId:99,
    identifier:chess[id]?.identifier??Math.max(...Object.values(chess).map(c=>c.identifier||0))+1,
    bonds:[charId==='char_4231_clemnt'?'egirShip':'victoriaShip','elementShip'],garrisonIds:[gar+(gold?'_b':'_a')],upgradeNum:gold?0:3,upgradeChessId:gold?null:stem+'_b',
    backup:{charId,tmplId:null,skillIndex:2,uniEquipId:modId,potRank:5}};
@@ -23,7 +24,7 @@ for(const [stem,charId,tier,modId,gar] of defs){
   if(!gold&&selected){rec.statsBase=form.stats;rec.traitBase=form.trait;rec.talentsBase=form.talents;rec.modules=form.modules.map(m=>({...m,isDefault:m.uniEquipId===selected}));}
   chess[id]=rec;
   const status=gold?'2/60/7/3':'2/1/4/0';
-  for(const tk of form.tokens??[]){const src=backups.tokens[tk];if(!src)continue;tokens[tk]??=structuredClone(src);tokens[tk].variants??={};const v=src.variants?.[`${charId}@${status}`];if(v)tokens[tk].variants[id]=structuredClone(v);}
+  for(const tk of form.tokens??[])addChessToken(tokens,backups.tokens,tk,rec,`${charId}@${status}`);
  }
  // Keep DIY behaviour/picks intact: this update only adds fixed cards.
 }
@@ -38,7 +39,7 @@ for(const gold of [false,true]){
  const ce=gars['garrison_90'+suf];ce.bb.extra_element_layers=2;ce.desc=ce.descRaw=ce.desc.replace(/；开启技能时额外.*$/,'')+'；开启技能时额外使【元素】层数+2，触发次数与原效果相同';
 }
 for(const [bid,rec] of Object.entries(bonds)){
- const ids=Object.values(chess).filter(c=>!c.isGolden&&!c.isDiy&&c.bonds.includes(bid)).map(c=>c.chessId);rec.members=ids;rec.visibleMembers=ids.filter(id=>chess[id].visible);
+ const ids=Object.values(chess).filter(c=>!c.isGolden&&!c.isDiy&&c.bonds.includes(bid)).map(c=>c.chessId).sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));rec.members=ids;rec.visibleMembers=ids.filter(id=>chess[id].visible);
 }
 const e=bonds.elementShip;e.bb.base_damage_scale_show=.25;e.bb.damage_scale_per_stack=.005;e.buffs[0].bb={...e.bb};
 for(const k of ['desc','descRaw'])e[k]=e[k].replace('提升10%','提升（25%＋0.5%×层数）');

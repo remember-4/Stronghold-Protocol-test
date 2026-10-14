@@ -24,7 +24,9 @@ export class MatchPrep {
       ps.recompute();
     }
     // An exchange may leave zero target life: settle elimination before accepting prep actions.
-    for (const ps of alive) if(ps.lp<=0 && ps.alive) {const legacy=this.augmentLegacyOf(ps);ps.eliminate(this.round);this.augmentLegacy(ps,legacy);this.markPrivate(ps);}
+    // (A6000 fork: not on the merged team LP of the Hidden Core's round — a player's share of it (bossRounds.js
+    // _syncTeamLp) may round to 0 while the team stands; invariants.js the same)
+    if (this.teamLp == null) for (const ps of alive) if(ps.lp<=0 && ps.alive) {const legacy=this.augmentLegacyOf(ps);ps.eliminate(this.round);this.augmentLegacy(ps,legacy);this.markPrivate(ps);}
     if(!this.alivePlayers().length){this.finish({victory:false,reason:'eliminated'});return;}
     // A6000 fork: 专属强化III·老鲤 — the round of the pick is lost: ready at once, no bot prep (match/augments.js)
     for (const ps of alive) if (ps.augLockRound === this.round) ps.ready = true;

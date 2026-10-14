@@ -469,6 +469,7 @@ export const SUB = Object.freeze({
   fastshot: P({ priority: 'fly', dmgMul: (b, u, t) => (t.isFlying ? (u.profile.flyScale ?? 1) : 1) }),
   closerange: P({}),
   longrange: P({ priority: 'lowDef' }),
+  siegesniper: P({ priority: 'heaviest' }), // 攻城手 "优先攻击重量最重的敌人" (提丰, since the friend's 萨卡兹)
   aoesniper: P({ splashRadius: 1.1, projectile: 'bomb' }),
   // PRTS 溅射半径一览 (特性): 投掷手 0.9, 扩散术师 1.1 (格雷伊 1.0, TUNE below), 链术师 1.7 jumps; 炮手 1.0 (none in the pool)
   bombarder: P({ splashRadius: 0.9, projectile: 'bomb', groundOnly: true, canHitFly: false,
@@ -551,6 +552,7 @@ export const SUB = Object.freeze({
   centurion: P({ hitAllBlocked: true }),
   crusher: P({ hitAllBlocked: true }),
   fearless: P({}),
+  primguard: P({}), // 本源近卫 (克莱门莎, the friend's 元素): blocks 2 by its stats, its 元素损伤 come from its kit
   fighter: P({}),
   hammer: P({ splashRadius: 1.0, splashScale: 0.5, splashOthersOnly: true }),
   instructor: P({ dmgMul: (battle, unit, target) => (target.blockedBy === unit ? 1 : (unit.profile.unblockedScale ?? 1.2)) }),

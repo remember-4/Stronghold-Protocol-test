@@ -34,7 +34,7 @@
   "战争机器": "War Machine",
   "所有干员造成的伤害提升至 {dealt}%，受到的伤害降低 {taken}%，攻击间隔缩短 {interval}%，技力回复速度 +{sp}%": "All operators deal {dealt}% damage, take {taken}% less damage, attack with a {interval}% shorter interval and recover SP {sp}% faster",
   "同仇敌忾": "United Front",
-  "每名干员造成的伤害提升 {pct}% × 场上与它同属一个盟约的其他干员数（至多提升至 {cap}%）": "Each operator deals {pct}% more damage for every other operator on the field that shares a bond with it (up to {cap}%)",
+  "每名干员造成的伤害提升 5% × 场上与它同属一个盟约的其他干员数（至多提升至 135%）": "Each operator deals 5% more damage for every other operator on the field that shares a bond with it (up to 135%)",
   "天火": "Skyfire",
   "作战中每 {every} 秒，对你战场上所有敌人造成你干员最高攻击力 {pct}% 的法术伤害（领袖受到一半）": "Every {every} seconds of a battle, every enemy on your field takes arts damage equal to {pct}% of your operators' highest ATK (leaders take half)",
   "无限火力": "Ultra Rapid Fire",

@@ -31,7 +31,8 @@ export const teamFxMode = (v) => (TEAM_FX_MODES.includes(v) ? v : TEAM_FX_DEFAUL
  * @param {any} raw
  */
 export function sanitizeAppSettings(raw) {
-  return { ...sanitizeSettings(raw), teamFx: teamFxMode(raw && typeof raw === 'object' ? raw.teamFx : null) };
+  const o = raw && typeof raw === 'object' ? raw : null;
+  return { ...sanitizeSettings(raw), teamFx: teamFxMode(o ? o.teamFx : null) };
 }
 
 /** Settings store: { bgm, sfx, voice, muted, damageNumbers, quality, keys, teamFx }. */

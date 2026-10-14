@@ -7,8 +7,9 @@
 //   叠层狂魔  aug_stack_maniac  an in-battle 特质 gain of the player (layerGain reason 'garrison') +pct % (floored, at least
 //                              1) — after the other gain handlers (魔王, 乘胜追击, 小盟约专精 ≥ −100, 专精深耕 −150)
 //   卦象      aug_hexagram      the round's trigram (EffectRef data { round, gua }, the prep's draw): 乾 every operator
-//                              ×dealt %; 坤 −taken %; 巽 interval −interval %; 震 the first moment the field has enemies,
-//                              every enemy on it is stunned `stun` s (immunities and 抵抗 as usual; fx 'shockBlast'); 离 an
+//                              ×dealt %; 坤 −taken %; 巽 interval −interval %; 震 every enemy, the first moment it is on the
+//                              field (and not hidden), is stunned `stun` s (immunities and 抵抗 as usual; fx 'shockBlast'
+//                              the first time; the friend's revision of 2026-10-14 — before: the field's enemies once); 离 an
 //                              attack of the player's units that lands on an enemy sets a burn on it (one per attacker,
 //                              refreshed by its next attack): every second for burnSec s, burn % of that attacker's ATK as
 //                              arts damage (a DoT, tag 'dot'). 坎 / 艮 / 兑 act outside the battle.
@@ -70,14 +71,17 @@ function allOps(battle, pid, id, mods, extra = {}) {
   for (const u of playerOps(battle, pid)) passiveBuff(battle, u, KEY(id), mods, extra);
 }
 
-/** 卦象·震: the first moment the field has an enemy, every enemy on it is stunned `sec` s. */
+/** 卦象·震: every enemy, the first moment it is on the field (not hidden), is stunned `sec` s (the fx the first time). */
 function stunOnce(battle, key, sec) {
   if (!(sec > 0)) return;
   const seen = new Set();
+  let shown = false;
   battle.on('tick', () => {
     const list = battle.enemies.filter((e) => e.alive && !e.hidden && !seen.has(e));
     if (!list.length) return;
     for (const e of list) if (e.alive&&!seen.has(e)) {seen.add(e);battle.applyStatus(e,'stun',{duration:sec,source:null});}
+    if (shown) return;
+    shown = true;
     const R = battle.rect;
     battle.fx('shockBlast', { x: (R.c0 + R.c1) / 2, y: (R.r0 + R.r1) / 2, r: 20, src: key });
   });
@@ -173,7 +177,7 @@ function drawTrigram(ctx, p) {
   switch (gua) {
     case 'qian': ctx.ticker(msg('卦象：{name} 抽到了乾卦，本回合所有干员造成的伤害提升至 {pct}%', { name, pct: num(p.dealt, 125) })); break;
     case 'kun': ctx.ticker(msg('卦象：{name} 抽到了坤卦，本回合受到的伤害降低 {pct}%', { name, pct: num(p.taken, 25) })); break;
-    case 'zhen': ctx.ticker(msg('卦象：{name} 抽到了震卦，开战时晕眩场上所有敌人 {sec} 秒', { name, sec: num(p.stun, 2) })); break;
+    case 'zhen': ctx.ticker(msg('卦象：{name} 抽到了震卦，本回合所有敌人进入战斗时晕眩 {sec} 秒', { name, sec: num(p.stun, 2) })); break;
     case 'xun': ctx.ticker(msg('卦象：{name} 抽到了巽卦，本回合攻击间隔缩短 {pct}%', { name, pct: num(p.interval, 20) })); break;
     case 'kan': {
       const n = Math.max(0, Math.trunc(num(p.funds, 3)));
