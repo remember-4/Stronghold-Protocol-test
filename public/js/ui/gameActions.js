@@ -66,6 +66,7 @@ export const actions = {
   reward: (idx) => act('g.reward', { idx }),
   choice: (idx) => act('g.choice', { idx }),
   // A6000 fork: 海克斯 / 敌人强化 (ui/augmentOverlay.js)
+  augReroll: () => act('g.augReroll', {}, { sfx: 'pick' }),
   augPick: (id) => act('g.augPick', { id }, { sfx: 'pick' }),
   enemyVote: (id) => act('g.enemyVote', { id }, { sfx: 'confirm' }),
   augAction: (id) => act('g.augAction', { id }, { sfx: 'confirm' }),

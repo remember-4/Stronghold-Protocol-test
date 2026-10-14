@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g1.js — A6000 fork, 海克斯第五版 (联动：层数、叠层手、精锐（J1–J7、K1–K5、L1–L4，O14 今日特供，O20 木桩大师）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第五版候选-联动与节目效果.md). Built with augR (shared/augmentDef.js): rarity 1…6
 // = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g1.js (battle, prep) and server/match/augments5/g1.js
@@ -47,7 +48,7 @@ export const DEFS = Object.freeze([
     { pct: 150 }, 'both'),
   augR('aug_dummy_master', 1, N_('木桩大师'), N_('第 1～{maxRound} 回合的作战中，你的半场清空后出现一个木桩：不攻击、不移动、不会漏走、不算进完美作战，作战结束时消失；生命为本回合你半场敌人总生命的 {hp}%（持有练功房时不另出现）'),
     { maxRound: 8, hp: 12.5 }, 'battle'),
-]);
+].map(reviseAugment));
 
 /** Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT). */
 export const BOT = Object.freeze({

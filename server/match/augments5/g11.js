@@ -299,6 +299,7 @@ function freerideMerge(m, driver, ev) {
     if (!(n > 0)) continue;
     rider.counters['aug6:freeride'] = used + 1;
     rider.addFunds(n, { reason: KEY('aug_freeride') });
+    driver.addFunds(n, { reason: KEY('aug_freeride') });
     fx(m, 'freeride', driver, rider, { amount: n });
     m.toast(rider, 'info', msg('搭便车：{name} 合成了精锐，+{n} 资金', { name: driver.name, n }));
     m.markPublic();

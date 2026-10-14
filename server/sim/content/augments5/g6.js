@@ -266,7 +266,7 @@ export const META = Object.freeze({
   // B11 升级福利: every level-up (a free one too) — the new level's count of free refreshes
   aug_level_gift: () => ({
     onLevelUp(ctx, ev) {
-      const n = Math.max(0, int(ev && ev.level));
+      const n = Math.max(0, int(ev && ev.level)-1);
       if (!(n > 0)) return;
       ctx.grantFreeRefresh(n);
       ctx.toast(msg('升级福利：获得 {n} 次免费刷新', { n }));

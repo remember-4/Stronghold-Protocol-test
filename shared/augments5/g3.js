@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g3.js — A6000 fork, 海克斯第五版 (单人节目效果（O1–O10、O12、O13、O15–O18）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第五版候选-联动与节目效果.md). Built with augR (shared/augmentDef.js): rarity 1…6
 // = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g3.js.
@@ -60,7 +61,7 @@ export const DEFS = Object.freeze([
   // O18 嘲讽大师
   augR('aug_taunt_master', 3, N_('嘲讽大师'), N_('每场作战中，敌人第一次靠近你生命上限最高的干员时，它嘲讽周围敌人 {sec} 秒，期间受到的伤害降低 {taken}%'),
     { sec: 8, taken: 30 }, 'battle'),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): the steady battle ones mid-table,

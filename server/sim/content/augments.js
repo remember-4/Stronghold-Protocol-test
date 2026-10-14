@@ -50,8 +50,9 @@ import * as AUG5_G8 from './augments5/g8.js';
 import * as AUG5_G9 from './augments5/g9.js';
 import * as AUG5_G10 from './augments5/g10.js';
 import * as AUG5_G11 from './augments5/g11.js';
+import * as USER_HEX from './augments5/user.js';
 
-const AUG5 = [AUG5_G1, AUG5_G2, AUG5_G3, AUG5_G4, AUG5_G5, AUG5_G6, AUG5_G7, AUG5_G8, AUG5_G9, AUG5_G10, AUG5_G11];
+const AUG5 = [USER_HEX, AUG5_G1, AUG5_G2, AUG5_G3, AUG5_G4, AUG5_G5, AUG5_G6, AUG5_G7, AUG5_G8, AUG5_G9, AUG5_G10, AUG5_G11];
 import { COLS } from '../constants.js';
 import { msg, dn } from '../../../shared/i18n.js';
 
@@ -317,7 +318,7 @@ function installGeneric(battle, ps, id, p) {
       every(battle, POS_PERIOD, () => {
         for (const u of playerOps(battle, pid, { fieldOnly: true })) {
           if (alliesAround(battle, u, N4).length < 4) continue;
-          for (const e of battle.enemies) if (e.alive && !e.hidden && inRange(u, e)) keepUp(battle, e, key, mods);
+          for (const e of battle.enemies) if (e.alive && !e.hidden && inRange(u, e)) keepUp(battle, e, id === 'aug_center' ? 'augment:aug_center:aura' : key, mods);
         }
       });
       break;
@@ -403,6 +404,7 @@ function installPlayer(battle, ps, ids) {
     // 职业专精 (A6000 fork, 2026-10-09): their own module
     if (def.cls) { installClass(battle, ps, id, def); continue; }
     // 海克斯第五版: the batch that defines it
+    if (id === 'aug_medic') USER_HEX.installMedic(battle,ps);
     if (AUG5.some((g) => g.install(battle, ps, id, def))) continue;
     const mods = opModsOf(battle, pid, id, p);
     installGeneric(battle, ps, id, p);
@@ -789,7 +791,7 @@ const GENERIC_META = {
   aug_spark: (p) => ({
     onRoundStart(ctx) {
       const list = stackable(ctx).sort((a, b) => (a[1].layers ?? 0) - (b[1].layers ?? 0));
-      if (list.length) ctx.addLayers(list[0][0], num(p.layer, 2), { requireActive: true, reason: 'augment:aug_spark' });
+      for (const [id] of list.slice(0,2)) ctx.addLayers(id, num(p.layer, 2), { requireActive: true, reason: 'augment:aug_spark' });
     },
   }),
   // 主心骨: the active bond with the most members (ties: more layers)
@@ -1033,7 +1035,7 @@ const EXCLUSIVE_META = {
     },
   }),
   // 小贾斯汀 I: a 进阶 骑士储蓄罐 now (the table of 2026-10-10; its II is gone)
-  aug_x_justin1: (p) => ({ onAugmentPick(ctx) { ctx.grantItem(p.item, { source: 'augment' }); } }),
+  aug_x_justin1: (p) => ({ onAugmentPick(ctx) { ctx.setCounter('aug:justin1:due',ctx.round+1); }, onRoundStart(ctx) {if(ctx.counter('aug:justin1:due')===ctx.round){ctx.setCounter('aug:justin1:due',0);ctx.grantItem(p.item,{source:'augment'});}} }),
   // 小贾斯汀 III: every `step` funds used in a round → 1 at the next round start, at most max
   aug_x_justin3: (p) => ({
     onSpend(ctx, ev) { if (ev && ev.amount > 0) ctx.incCounter(`aug:justin3:${ctx.round}`, ev.amount); },
@@ -1106,7 +1108,8 @@ const EXCLUSIVE_META = {
     onRoundStart(ctx) {
       const from = ctx.counter('aug:harold2:from'), every = Math.max(1, num(p.every, 2));
       if (!(from > 0) || ctx.round <= from || (ctx.round - from) % every !== 0) return;
-      const id = ctx.rollChess({ bond: p.bond, maxTier: Math.max(1, ctx.shopLevel()) }) || ctx.rollChess({ bond: p.bond, maxTier: 6 });
+      const owned = new Set([...ctx.board(),...ctx.hand(),...ctx.temp()].filter(v=>v?.kind==='chess').map(v=>ctx.gd.baseIdOf(v.id)));
+      const id = ctx.rollChess({ bond: p.bond, maxTier: Math.max(1, ctx.shopLevel()), filter:id=>!owned.has(ctx.gd.baseIdOf(id)) }) || ctx.rollChess({ bond: p.bond, maxTier: Math.max(1, ctx.shopLevel()) }) || ctx.rollChess({ bond:p.bond,maxTier:6 });
       if (id) ctx.grantChess(id, { source: 'augment' });
     },
   }),

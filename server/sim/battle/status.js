@@ -13,6 +13,7 @@ export class BattleStatus {
   addBuff(unit, b) {
     if (!unit || (!unit.alive && !b.allowDead)) return null;
     const buff = makeBuff(b);
+    if ((buff.shield > 0 || buff.shieldHits > 0) && this._hooks.shieldGain) this.emit('shieldGain',{unit,amount:buff.shield});
     const list = unit.buffs;
     let idx = -1;
     for (let i = 0; i < list.length; i++) if (list[i].key === buff.key) { idx = i; break; }

@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g7.js — A6000 fork, 海克斯第六版 (招募、精锐与装备（C1–C21）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第六版-大扩充.md: rarities, numbers, sets and ids). Built with augR
 // (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g7.js (博物馆 in battle,
@@ -57,7 +58,7 @@ export const DEFS = Object.freeze([
   augR('aug_museum', 3, N_('博物馆'), N_('作战中你的干员身上每有 1 件装备，所有干员造成的伤害提升 {pct}%（连乘，至多 {max} 件）'), { pct: 1, max: 16 }, 'battle'),
   // C21 教鞭 (〔生财〕)
   augR('aug_whip', 1, N_('教鞭'), N_('立即获得 1 个<教鞭>（选一项悬赏任务挑战）'), {}, 'meta'),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): what grows a bot's board without a

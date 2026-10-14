@@ -23,13 +23,16 @@ export class MatchPrep {
       this.dispatch(ps, 'onPrepStart', { round: this.round });
       ps.recompute();
     }
+    // An exchange may leave zero target life: settle elimination before accepting prep actions.
+    for (const ps of alive) if(ps.lp<=0 && ps.alive) {const legacy=this.augmentLegacyOf(ps);ps.eliminate(this.round);this.augmentLegacy(ps,legacy);this.markPrivate(ps);}
+    if(!this.alivePlayers().length){this.finish({victory:false,reason:'eliminated'});return;}
     // A6000 fork: 专属强化III·老鲤 — the round of the pick is lost: ready at once, no bot prep (match/augments.js)
     for (const ps of alive) if (ps.augLockRound === this.round) ps.ready = true;
     // solo / single-human matches: untimed (soloUntimed); co-op: the round's prepTime
     const secs = this.soloUntimed ? null : this.gd.prepTime(this.round);
     this.setDeadline(secs, () => this.prepDeadline());
     let i = 0;
-    for (const ps of alive) if (ps.botControlled) this.scheduleBotPrep(ps, i++);
+    for (const ps of alive) if (ps.alive && ps.botControlled) this.scheduleBotPrep(ps, i++);
     this.markPublic();
     this.maybeEndPrep();
   }

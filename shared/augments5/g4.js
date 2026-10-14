@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g4.js — A6000 fork, 海克斯第五版 (同盟节目效果（P1–P20）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第五版候选-联动与节目效果.md, table P and the rules under it: 损人利己的底线, 记仇).
 // Built with augR (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. Every one is co-op only (`coop`); 加油 / 卖队友
@@ -51,7 +52,7 @@ export const DEFS = Object.freeze([
     { dealt: 125, taken: 10 }, 'battle', COOP),
   augR('aug_steal_credit', 1, N_('抢功'), N_('联防和最终攻势中，同一战场队友击倒悬赏敌人所得的资金改为归你（每回合至多 {max} 资金）'),
     { max: 2 }, 'meta', COOP),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): all the lowest — a bot never takes

@@ -229,11 +229,11 @@ export class MatchEnemyVotes {
   }
 
   /** The vote of this round: { options, votes, tier, boss, reverse } (the AUGMENT phase's `aug.vote`). */
-  rollEnemyVote() {
+  rollEnemyVote(forcedRarity = null) {
     const st = this._ebState();
     const boss = this.round >= this.gd.bossRound - 1;
-    const tier = rollVoteTier(st.settings.weights, this.rngAug, { noPrism: st.settings.firstNoPrism && this.round === st.settings.enemyRounds[0] });
-    const options = rollVoteOptions(this.enemyBuffs, this.rngAug, { tier, boss, allowed: (d) => this.enemyBuffAvailable(d) });
+    const tier = forcedRarity ?? rollVoteTier(st.settings.weights, this.rngAug, { noPrism: st.settings.firstNoPrism && this.round === st.settings.enemyRounds[0] });
+    const options = rollVoteOptions(this.enemyBuffs, this.rngAug, { tier, boss, strict: true, allowed: (d) => this.enemyBuffAvailable(d) });
     return { options, votes: {}, tier, boss, reverse: st.reverse > 0 };
   }
 
@@ -259,6 +259,7 @@ export class MatchEnemyVotes {
     if (!enemyBuffDef(win)) return; // a vote without options (no pool left) changes nothing
     this.enemyBuffs.push(win);
     vote.winner = win;
+    for(const ps of this.alivePlayers())if(ps.augments.includes('aug_speaker')&&vote.votes[ps.playerId]===win)ps.addFunds(1,{reason:'augment:aug_speaker'});
     const def = enemyBuffDef(win);
     if (captain) this.tickerText(msg('队长 {name} 一人决定了这次投票', { name: this.players.get(captain)?.name ?? '' }), 1);
     if (def) this.tickerText(msg('敌人获得强化：{name}', { name: dn(def.name) }), 1);

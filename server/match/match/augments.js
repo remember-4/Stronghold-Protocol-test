@@ -104,6 +104,7 @@ export class MatchAugments {
     if (Number.isInteger(def.maxRound) && this.round > def.maxRound) return false;
     if (Number.isInteger(def.minRound) && this.round < def.minRound) return false;
     if (def.noLeftover && this.gd.leftoverKeptBands.includes(ps.bandId)) return false;
+    if (def.id === 'aug_vs_times' && !this.factions?.includes('TIMES')) return false;
     if (def.id === 'aug_savings' && this.gd.leftoverKeptBands.includes(ps.bandId)) return false;
     if (def.id === 'aug_x_harold3') {
       const base = this.gd.baseIdOf(def.params.chess);
@@ -162,17 +163,27 @@ export class MatchAugments {
     const vote = this.enemyVoteRound(this.round);
     if (!alive.length || (!tier && !vote)) { this.afterAugment(); return; }
     this.phase = PHASE.AUGMENT;
-    const a = { round: this.round, tier, offers: {}, picks: {}, rarity: {}, extra: {}, vote: null, untimed: this.soloUntimed };
+    const a = { round: this.round, tier, offers: {}, picks: {}, rarity: {}, extra: {}, rerolls: {}, commonRarity: null, vote: null, untimed: this.soloUntimed };
+    const settings=this._ebState().settings;
+    if(settings.samePlayerQuality && (tier || settings.sameBothQuality && vote)) {
+      const seen=alive.some(ps=>!(ps.augRarities||[]).some(r=>r>=5)) ? [] : [5];
+      a.commonRarity=rollRarity(Math.min(this.round,13),this.rngAug,seen);
+      const shifts=tier ? alive.reduce((sum,ps)=>sum+Math.trunc(Number(ps.augRarityShift)||0),0) : 0;
+      a.commonRarity=Math.max(1,Math.min(6,a.commonRarity+shifts));
+      if(tier)for(const ps of alive)ps.augRarityShift=0;
+      if(settings.sameBothQuality && vote && settings.firstNoPrism && this.round===settings.enemyRounds[0] && a.commonRarity===6)a.commonRarity=5;
+    }
     if (tier) {
       for (const ps of alive) {
-        const { rarity, offers } = this._augmentOffersFor(ps, tier);
+        const { rarity, offers } = this._augmentOffersFor(ps, tier, { forcedRarity:a.commonRarity, strict:settings.samePlayerQuality });
         a.rarity[ps.playerId] = rarity;
         a.offers[ps.playerId] = offers;
+        a.rerolls[ps.playerId]=ps.augments.includes('aug_u_choice_reroll')?1:0;
         // 海克斯第六版 预约券: this phase the player picks once more per voucher (_applyAugment deals the next set)
         if (ps.augVoucher > 0) { a.extra[ps.playerId] = Math.trunc(ps.augVoucher); ps.augVoucher = 0; }
       }
     }
-    if (vote) a.vote = this.rollEnemyVote();
+    if (vote) a.vote = this.rollEnemyVote(settings.sameBothQuality ? a.commonRarity : null);
     this.aug = a;
     const secs = Math.max(tier ? AUGMENT_SECONDS : 0, vote ? VOTE_SECONDS : 0);
     const token = ++this._turnToken;
@@ -188,28 +199,41 @@ export class MatchAugments {
    * each player rolls one (shared/augments.js rollRarity, the pity at R8). 海克斯第六版: 增幅 / 预支 shift that roll once
    * (`ps.augRarityShift`), 加购 deals more generic cards (`ps.augExtraOffers`); without them nothing draws differently.
    */
-  _augmentOffersFor(ps, tier) {
-    let rarity = rollRarity(Math.min(this.round, 13), this.rngAug, ps.augRarities ?? []);
-    if (ps.augRarityShift) {
+  _augmentOffersFor(ps, tier, opts = {}) {
+    const forcedRarity=opts.forcedRarity ?? this.aug?.commonRarity;
+    const strict=opts.strict ?? this._ebState().settings.samePlayerQuality;
+    let rarity = forcedRarity ?? rollRarity(Math.min(this.round, 13), this.rngAug, ps.augRarities ?? []);
+    if (forcedRarity == null && ps.augRarityShift) {
       rarity = Math.max(1, Math.min(6, rarity + Math.trunc(Number(ps.augRarityShift) || 0)));
       ps.augRarityShift = 0;
     }
-    (ps.augRarities ??= []).push(rarity);
+    if(opts.record!==false)(ps.augRarities ??= []).push(rarity);
     if (rarity === 6) this.tickerText(msg('{name} 抽到了红色海克斯！', { name: ps.name }), 1);
     const n = AUGMENT_OFFERS + Math.max(0, Math.trunc(Number(ps.augExtraOffers) || 0));
     // 专属强化 only on their rounds (EXCLUSIVE_ROUNDS), of that round's tier — the 海克斯 come every round since 2026-10-10
     const ex = EXCLUSIVE_ROUNDS[this.round] ?? 0;
     const bandId = ex && !this.exclusivesOff ? ps.bandId : null;
-    const offers = rollAugments(ex || tier, ps.augments, this.rngAug, n, bandId, (d) => this.augmentAvailable(ps, d), this.classCounts(ps), rarity);
+    const offers = rollAugments(ex || tier, ps.augments, this.rngAug, n, bandId, (d) => this.augmentAvailable(ps, d) && !(opts.avoid||[]).includes(d.id), this.classCounts(ps), rarity, strict);
     // balance runs (tools/matchrun.mjs --augment): a forced augment of the tier, legal for the strategy, is offered (a
     // 专属强化 on its own rounds)
     const forced = this.forceAugments.find((id) => {
       const d = augmentDef(id);
-      if (!d || ps.augments.includes(id) || !this.augmentAvailable(ps, d)) return false;
+      if (!d || (strict && d.rarity!==rarity) || (opts.avoid||[]).includes(id) || ps.augments.includes(id) || !this.augmentAvailable(ps, d)) return false;
       return d.band ? !!ex && d.tier === ex && d.band === ps.bandId : d.tier === tier;
     });
     if (forced && !offers.includes(forced)) offers[offers.length - 1] = forced;
     return { rarity, offers };
+  }
+
+  /** One future selection reroll from 掷投狂人; exact rarity, no extra rarity-history or pity draw. */
+  rerollAugment(ps) {
+    const a=this.aug,pid=ps.playerId;
+    if(this.phase!==PHASE.AUGMENT || !a)return fail(ERR.WRONG_PHASE);
+    if(!ps.alive)return fail(ERR.ELIMINATED);
+    if(!a.offers[pid] || a.picks[pid]!=null || !(a.rerolls?.[pid]>0))return fail(ERR.BAD_TARGET);
+    const next=this._augmentOffersFor(ps,a.tier,{forcedRarity:a.rarity[pid],strict:true,record:false,avoid:a.offers[pid]});
+    if(!next.offers.length)return fail(ERR.BAD_TARGET);
+    a.rerolls[pid]--;a.offers[pid]=next.offers;this.markPrivate(ps);return OK;
   }
 
   /** The player still has something to do in this AUGMENT phase. */
@@ -780,7 +804,7 @@ export class MatchAugments {
     const a = this.aug;
     if (this.phase !== PHASE.AUGMENT || !a || !a.offers[ps.playerId]) return null;
     return {
-      offers: a.offers[ps.playerId].slice(), picked: a.picks[ps.playerId] ?? null, rarity: a.rarity?.[ps.playerId] ?? null,
+      canReroll: !!(a.rerolls?.[ps.playerId]>0 && a.picks[ps.playerId]==null), offers: a.offers[ps.playerId].slice(), picked: a.picks[ps.playerId] ?? null, rarity: a.rarity?.[ps.playerId] ?? null,
     };
   }
 }

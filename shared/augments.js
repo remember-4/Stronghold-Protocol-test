@@ -1,3 +1,4 @@
+import { reviseAugment, REMOVED_AUGMENTS, USER_AUGMENTS } from './hexRevision.js';
 // shared/augments.js — A6000 fork: 海克斯 (the players' augments) and 敌人强化 (the enemies' upgrades), the user's design of
 // 2026-10-09: on some rounds each player picks one of three augments for the rest of the match; on others every player
 // votes on one of three upgrades that every enemy of the match takes from then on. Imported by the server (the AUGMENT
@@ -279,6 +280,7 @@ const CLASS_RARITY = Object.freeze({ 1: 2, 2: 4, 3: 5 });
 
 /** A definition with its rarity (a generic one's tier becomes its rarity's band). */
 function withRarity(a) {
+  a = reviseAugment(a);
   if (a.rarity) return a;
   if (a.band) return Object.freeze({ ...a, rarity: EXCLUSIVE_RARITY[a.tier] ?? 1 });
   if (a.cls) return Object.freeze({ ...a, rarity: CLASS_RARITY[a.tier] ?? 2 });
@@ -292,7 +294,7 @@ const BATCHES = [AUG5_G1, AUG5_G2, AUG5_G3, AUG5_G4, AUG5_G5, AUG5_G6, AUG5_G7, 
  * Every definition: the older ones, the batches', and the 套装 bonuses' pseudo augments (SET_DEFS, `pseudo`: never offered,
  * never in a player's `augments` — the match keeps their EffectRef while a set is on).
  */
-export const AUGMENTS = Object.freeze([...BASE_AUGMENTS, ...BATCHES.flatMap((b) => b.DEFS), ...SET_DEFS].map(withRarity));
+export const AUGMENTS = Object.freeze([...BASE_AUGMENTS, ...BATCHES.flatMap((b) => b.DEFS), ...SET_DEFS, ...USER_AUGMENTS].filter(a => !REMOVED_AUGMENTS.has(a.id)).map(withRarity));
 /** Bot preferences of the batches (server/match/match/augments.js merges them into its table). */
 export const AUG5_BOT = Object.freeze(Object.assign({}, ...BATCHES.map((b) => b.BOT)));
 /** The ids the batches define (the older lists' tests leave them out; each batch has its own test file). */
@@ -374,21 +376,21 @@ function draw(list, n, rng) {
  * 专属强化: "每位领袖的专属强化只能选择一项" (the table's note). `allowed(def)` may veto one (哈洛德 III with 维娜 banned, a co-op-only
  * generic one in solo — server/match/match/augments.js augmentAvailable).
  */
-export function rollAugments(tier, owned, rng, n = AUGMENT_OFFERS, bandId = null, allowed = null, classCounts = null, rarity = null) {
+export function rollAugments(tier, owned, rng, n = AUGMENT_OFFERS, bandId = null, allowed = null, classCounts = null, rarity = null, strictRarity = false) {
   const skip = new Set(owned || []);
   const hasOwn = (owned || []).some((id) => AUG_INDEX.get(id)?.band);
   const own = bandId && !hasOwn
-    ? AUGMENTS.find((a) => a.band === bandId && a.tier === tier && !(owned || []).includes(a.id) && (!allowed || allowed(a))) : null;
+    ? AUGMENTS.find((a) => a.band === bandId && a.tier === tier && !(owned || []).includes(a.id) && (!strictRarity || a.rarity===rarity) && (!allowed || allowed(a))) : null;
   // 职业专精 (A6000 fork): the last card, for a profession the player fields CLASS_OFFER_MIN+ times (weighted by how many);
   // with a rolled rarity, of that rarity's band
-  const cls = classCounts ? classCard(rarity ? bandOf(rarity) : tier, classCounts, skip, rng, allowed) : null;
+  const cls = classCounts ? classCard(rarity ? bandOf(rarity) : tier, classCounts, skip, rng, d => (!strictRarity || d.rarity===rarity) && (!allowed || allowed(d))) : null;
   const generic = AUGMENTS.filter((a) => !a.band && !a.cls && !a.pseudo && (!allowed || allowed(a)));
   const k = n - (own ? 1 : 0) - (cls ? 1 : 0);
   let list;
   if (rarity) {
     // the rolled rarity; short of it (a co-op-heavy rarity in solo), the nearest rarities fill in (the lower one first)
     list = generic.filter((a) => a.rarity === rarity && !skip.has(a.id));
-    for (let d = 1; list.length < k && d < 6; d++) {
+    for (let d = 1; !strictRarity && list.length < k && d < 6; d++) {
       for (const r of [rarity - d, rarity + d]) {
         if (r < 1 || r > 6 || list.length >= k) continue;
         const more = generic.filter((a) => a.rarity === r && !skip.has(a.id));

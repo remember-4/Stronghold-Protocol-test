@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g6.js — A6000 fork, 海克斯第六版 (运营：资金、商店、调度中心（B1–B19）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第六版-大扩充.md: rarities, numbers, sets and ids). Built with augR
 // (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g6.js (prep handlers,
@@ -38,7 +39,7 @@ export const DEFS = Object.freeze([
   augR('aug_budget', 2, N_('充足预算'), N_('作战开始时部署费用 +{dp}，部署费用回复速度 +{pct}%'), { dp: 6, pct: 10 }, 'battle'),
   augR('aug_bounty_hunter', 2, N_('赏金猎人'), N_('每场普通作战，你的战场额外出现 1 名悬赏敌人（生命为本回合普通敌人平均值的 {mul} 倍），击倒得 {funds} 资金（下回合发放）'),
     { mul: 4, funds: 2 }, 'meta'),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): the steady economy ones a bot

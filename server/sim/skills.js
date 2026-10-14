@@ -477,7 +477,7 @@ export class SkillRuntime {
 
   /** Activate now (consumes one charge). Returns true on success. */
   activate(reason = 'manual', { free = false } = {}) {
-    if (this.noSkill || this.kind === 'passive') return false;
+    if (this.noSkill || this.kind === 'passive' || this.unit.s.flags.hexNoSkill) return false;
     if (!free && !this.ready) return false;
     if (this.active && this.isTimed) return false;
     const u = this.unit;

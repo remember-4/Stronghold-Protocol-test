@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g2.js — A6000 fork, 海克斯第五版 (联动：站位、装备、技能、召唤、元素、领袖战、运营（M1–M10、N1–N6、Q1–Q4）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第五版候选-联动与节目效果.md). Built with augR (shared/augmentDef.js): rarity 1…6
 // = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g2.js (battle, prep) and server/match/augments5/g2.js
@@ -36,7 +37,7 @@ export const DEFS = Object.freeze([
   augR('aug_headhunt', 2, N_('定向猎头'), N_('每回合首次主动刷新时，商店必定出现一名你主盟约（场上人数最多的核心盟约）中你还没有的干员（卡池还有时）'), {}, 'meta'),
   augR('aug_good_start', 1, N_('开门红'), N_('获得后的下一回合开始时，商店的干员格全部换成你场上人数最多的核心盟约的干员（一次；冻结保留的不换）'), {}, 'meta'),
   augR('aug_miser', 1, N_('守财奴'), N_('休整期结束时每剩 {per} 资金，所有干员攻击力 +{atk}%（整局累计，至多 +{max}%）'), { per: 3, atk: 1, max: 20 }, 'both'),
-]);
+].map(reviseAugment));
 
 /** Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT). */
 export const BOT = Object.freeze({

@@ -849,6 +849,9 @@ export function validateClientResult(spec, raw, { gd = null } = {}) {
       }
       const coins = Number(p.coins) || 0;
       if (!finiteIn(coins, 0, B.bountyCoins + own.coinAllow + 1e-6)) return bad('coins');
+      const burnAllowed=(spec.players||[]).find(x=>x.playerId===pid)?.playerEffects?.some(x=>x.key==='augment:aug_u_burn_income');
+      const hexBurnCoins=Number(p.hexBurnCoins)||0;
+      if(!finiteIn(hexBurnCoins,0,burnAllowed?Math.min(3,coins):0))return bad('burn coins');
       coinsSum += coins;
       const unitsEnd = [];
       const seen = new Set();
@@ -881,7 +884,7 @@ export function validateClientResult(spec, raw, { gd = null } = {}) {
       }
       const stat = (v) => (finiteIn(v, 0, 1e13) ? v : 0);
       perPlayer[pid] = {
-        killed: p.killed, total: p.total, leaked, perfect: countedLeaks === 0, layerGains, coins,
+        killed: p.killed, total: p.total, leaked, perfect: countedLeaks === 0, layerGains, coins, hexBurnCoins,
         damageDealt: stat(p.damageDealt), bossDamage: stat(p.bossDamage), healingDone: stat(p.healingDone), deaths: Math.trunc(stat(p.deaths)),
         unitsEnd, unitStats,
       };

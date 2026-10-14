@@ -33,6 +33,7 @@ export class MatchIntents {
       case 'g.reward': return ps.pickReward(msg.idx);
       case 'g.choice': return this.pickCard(ps, msg.idx);
       // A6000 fork: 海克斯 / 敌人强化 (match/augments.js)
+      case 'g.augReroll': return this.rerollAugment(ps);
       case 'g.augPick': return this.pickAugment(ps, msg.id);
       case 'g.enemyVote': return this.voteEnemyBuff(ps, msg.id);
       case 'g.augAction': return this.augmentAction(ps, msg.id, msg.target ?? null);

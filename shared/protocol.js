@@ -46,7 +46,7 @@ const isUnitStat = (u) => isPlain(u) && nullable(isUid)(u.uid) && nullable(isId)
 const isPerPlayer = (p) => isPlain(p) && isInt(p.killed, 0, 1e5) && isInt(p.total, 0, 1e5) && p.killed <= p.total
   && isList(p.leaked, RESULT_LIMITS.leaked, isLeak) && isBool(p.perfect)
   && isMap(p.layerGains, RESULT_LIMITS.layerGains, isId, (v) => isNum(v, 0, 1e4))
-  && isStat(p.coins) && isStat(p.damageDealt) && isStat(p.bossDamage) && isStat(p.healingDone) && isStat(p.deaths)
+  && (p.hexBurnCoins===undefined || isStat(p.hexBurnCoins)) && isStat(p.coins) && isStat(p.damageDealt) && isStat(p.bossDamage) && isStat(p.healingDone) && isStat(p.deaths)
   && isList(p.unitsEnd, RESULT_LIMITS.unitsEnd, isUnitEnd)
   && (p.unitStats === undefined || isList(p.unitStats, RESULT_LIMITS.unitStats, isUnitStat));
 const isUnspawned = (u) => isPlain(u) && isId(u.enemyKey) && nullable(isId)(u.sourcePlayerId) && nullable((v) => isStr(v, 16))(u.tag)
@@ -375,6 +375,7 @@ export const C2S = {
   'g.reward': { idx: (v) => isInt(v, 0, 5) },
   'g.choice': { idx: (v) => isInt(v, 0, 5) },
   // A6000 fork: 海克斯 / 敌人强化 (shared/augments.js)
+  'g.augReroll': {},
   'g.augPick': { id: (v) => isStr(v, 32) && /^aug_[a-z0-9_]+$/.test(v) },
   'g.enemyVote': { id: (v) => isStr(v, 32) && /^eb_[a-z0-9_]+$/.test(v) },
   // a 海克斯 used by a click in the prep (献祭, 命运轮盘, 熔炉: server/match/match/augments.js augmentAction)

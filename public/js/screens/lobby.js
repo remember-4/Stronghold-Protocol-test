@@ -1,3 +1,4 @@
+import { HexCatalogButton } from '../ui/hexCatalog.js';
 // Lobby screen: pick 独立模拟 / 同盟模拟 and a difficulty (标准/险境/绝境/终极), create a room,
 // or join one with a 同盟密钥 (recent codes remembered) — as a player (加入同盟) or in one of its MAX_SPECTATORS
 // spectator seats (观战: room.spectate, also while its match runs; community report #26, a remake feature — the
@@ -318,6 +319,7 @@ export function LobbyScreen() {
         <h1 class="topbar__title">${t('选择模拟协议')}</h1>
       </div>
       <div class="topbar__right">
+        <${HexCatalogButton} />
         <${GuideButton} class="lobby-guide" variant="secondary" label=${t('玩法说明')} />
         <${LoadoutButton} from="lobby" size="sm" class="lobby-loadout" label=${t('干员调配')} />
         <div class="me-chip">

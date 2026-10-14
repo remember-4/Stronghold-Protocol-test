@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g8.js — A6000 fork, 海克斯第六版 (任务、成长与延迟回报（D1–D11、E1–E12）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第六版-大扩充.md: rarities, numbers, sets and ids). Built with augR
 // (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g8.js (battle, prep) and
@@ -88,7 +89,7 @@ export const DEFS = Object.freeze([
   // E12 混沌契约·迅捷
   augR('aug_chaos_speed', 4, N_('混沌契约·迅捷'), N_('接下来 {rounds} 回合（含本回合）所有干员的攻击间隔延长 {slow}%；之后整局所有干员的攻击间隔缩短 {fast}%'),
     { rounds: 3, slow: 20, fast: 25 }, 'both'),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): the 任务 3–4, the steady battle

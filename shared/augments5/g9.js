@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g9.js — A6000 fork, 海克斯第六版 (战斗：伤害与条件（F1–F20）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第六版-大扩充.md: rarities, numbers, sets and ids). Built with augR
 // (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g9.js (battle, prep)
@@ -64,7 +65,7 @@ export const DEFS = Object.freeze([
   // F20 无限火力 〔疾风〕
   augR('aug_urf', 6, N_('无限火力'), N_('所有技能的技力消耗 −{cost}%、持续时间 −{dur}%（弹药类技能的弹药数同样减少）；所有干员攻击间隔缩短 {interval}%'),
     { cost: 35, dur: 15, interval: 10 }, 'battle'),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): the plain battle numbers a bot's

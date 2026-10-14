@@ -1414,7 +1414,7 @@ function MatchScreen() {
     ${sp ? html`<${ChoiceOverlay} pub=${pub} sp=${sp} myId=${myId} solo=${solo} busyIdx=${spBusy} total=${total}
       onPick=${async (i) => { setSpBusy(i); await actions.choice(i); setSpBusy(null); }} />` : null}
     ${phase === PHASE.AUGMENT && pub?.aug && alive ? html`<${AugmentOverlay} pub=${pub} priv=${priv} myId=${myId} solo=${solo} total=${total}
-      onPick=${(id) => actions.augPick(id)} onVote=${(id) => actions.enemyVote(id)} />` : null}
+      onReroll=${() => actions.augReroll()} onPick=${(id) => actions.augPick(id)} onVote=${(id) => actions.enemyVote(id)} />` : null}
 
     ${banner ? html`<${PhaseBanner} key=${banner.key} mode="overlay" title=${banner.title} sub=${banner.sub} micro=${banner.micro}
       tone=${banner.tone} duration=${banner.duration || 1500} onDone=${() => setBanner(null)} />` : null}

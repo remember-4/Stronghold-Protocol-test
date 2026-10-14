@@ -1,3 +1,4 @@
+import { EB_TIER_NAME } from '../../../shared/enemyBuffs.js';
 // A6000 fork: the AUGMENT phase overlay — 海克斯 (three offers of the round's tier, a two-tap pick like
 // the 机变 cards) and the 敌人强化 vote (three upgrades, one tap votes and can be changed until the phase ends; each card
 // shows who voted for it; A6000 fork: the vote's tier — and its 首领专场 / 逆反 — above the cards, each card coloured by
@@ -32,7 +33,7 @@ export function augmentView(id, owned = null) {
 /** Display fields of an enemy upgrade id (A6000 fork, second version: + its tier, as the 海克斯'). */
 export function enemyBuffView(id) {
   const d = enemyBuffDef(id);
-  return d ? { id, tier: d.tier, name: t(d.name), desc: t(d.desc, d.params), tierName: t(TIER_NAME[d.tier] || '') } : null;
+  return d ? { id, tier: d.rarity, name: t(d.name), desc: t(d.desc, d.params), tierName: t(EB_TIER_NAME[d.rarity] || '') } : null;
 }
 
 /**
@@ -65,7 +66,7 @@ export function AugmentOverlay(props) {
  * @param {{ pub: any, priv: any, myId: string, solo: boolean, busy?: boolean, total?: number|null, armed?: string|null,
  *   onTap?: (id: string) => void, onDisarm?: () => void, onVote?: (id: string) => void }} props
  */
-export function AugmentView({ pub, priv, myId, solo, busy = false, total = null, armed = null, onTap = () => {}, onDisarm = () => {}, onVote = () => {} }) {
+export function AugmentView({ pub, priv, myId, solo, busy = false, total = null, armed = null, onTap = () => {}, onDisarm = () => {}, onVote = () => {}, onReroll = () => {} }) {
   const aug = pub?.aug;
   if (!aug) return null;
   const mine = priv?.aug || null;
@@ -126,13 +127,14 @@ export function AugmentView({ pub, priv, myId, solo, busy = false, total = null,
           })}
         </div>
         ${mine.picked == null ? html`<div class="augov__bar">
+          ${mine.canReroll ? html`<${Button} variant="secondary" size="sm" icon="refresh" disabled=${busy} onClick=${onReroll}>${t('刷新候选（同品质，本轮1次）')}<//>` : null}
           <${Button} variant="primary" size="sm" icon="check" data-testid="aug-confirm" disabled=${!armed || busy} onClick=${() => armed && onTap(armed)}>${t('确认选择')}<//>
         </div>` : null}
       </section>` : null}
       ${vote ? html`<section class="augov__sec augov__vote" aria-label=${t('敌人强化投票')}>
         ${mine ? html`<h3 class="augov__h">${t('敌人强化投票')}<small>${t('票数最多的强化生效；平票随机；可以改票')}</small></h3>` : null}
         <div class="ebvote__meta">
-          ${vote.tier ? html`<span class=${cx('spcard__tag', `augcard__tier--t${vote.tier}`)}>${t('本次投票：{tier}', { tier: t(TIER_NAME[vote.tier] || '') })}</span>` : null}
+          ${vote.tier ? html`<span class=${cx('spcard__tag', `augcard__rar--r${vote.tier}`)}>${t('本次投票：{tier}', { tier: t(EB_TIER_NAME[vote.tier] || '') })}</span>` : null}
           ${vote.boss ? html`<span class="spcard__tag">${t('首领专场：只作用于领袖和领袖战，全额生效')}</span>` : null}
           ${vote.reverse ? html`<span class="spcard__tag ebvote__reverse">${t('逆反：本次票数最少的选项获胜')}</span>` : null}
         </div>
@@ -142,12 +144,12 @@ export function AugmentView({ pub, priv, myId, solo, busy = false, total = null,
             if (!v) return null;
             const voters = Object.entries(vote.votes || {}).filter(([, o]) => o === id).map(([pid]) => players.get(pid)).filter(Boolean);
             const mineVote = myVote === id;
-            return html`<button key=${id} type="button" data-eb=${id} class=${cx('spcard', 'augcard', 'ebcard', `augcard--t${v.tier}`, 'is-pickable', mineVote && 'is-mine')}
+            return html`<button key=${id} type="button" data-eb=${id} class=${cx('spcard', 'augcard', 'ebcard', `augcard--r${v.tier}`, 'is-pickable', mineVote && 'is-mine')}
                 disabled=${busy} aria-pressed=${String(mineVote)} onClick=${() => onVote(id)} title=${`${v.name}\n${v.desc}`}>
               <span class="spcard__glow" aria-hidden="true"></span>
               <span class="spcard__head">
                 <span class="spcard__icon"><${Img} src=${uiUrl(m, 'buffIcon/icon_enemy_debuff')} fallback=${html`<${GIcon} name="target" />`} /></span>
-                <span class="spcard__title"><b class="spcard__name">${v.name}</b><span class="spcard__tags"><span class=${cx('spcard__tag', `augcard__tier--t${v.tier}`)}>${v.tierName}</span><span class="spcard__tag">${t('{n} 票', { n: voters.length })}</span></span></span>
+                <span class="spcard__title"><b class="spcard__name">${v.name}</b><span class="spcard__tags"><span class=${cx('spcard__tag', `augcard__rar--r${v.tier}`)}>${v.tierName}</span><span class="spcard__tag">${t('{n} 票', { n: voters.length })}</span></span></span>
               </span>
               <p class="spcard__desc">${v.desc}</p>
               ${voters.length ? html`<span class="ebcard__voters">${voters.map((p) => html`<${PlayerAvatar} key=${p.playerId} player=${p} size="sm" self=${p.playerId === myId} />`)}</span>` : null}

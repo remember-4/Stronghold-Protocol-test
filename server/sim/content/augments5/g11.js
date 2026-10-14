@@ -73,13 +73,11 @@ function allOps(battle, pid, id, mods, extra = {}) {
 /** 卦象·震: the first moment the field has an enemy, every enemy on it is stunned `sec` s. */
 function stunOnce(battle, key, sec) {
   if (!(sec > 0)) return;
-  let done = false;
+  const seen = new Set();
   battle.on('tick', () => {
-    if (done) return;
-    const list = battle.enemies.filter((e) => e.alive && !e.hidden);
+    const list = battle.enemies.filter((e) => e.alive && !e.hidden && !seen.has(e));
     if (!list.length) return;
-    done = true;
-    for (const e of list) if (e.alive) battle.applyStatus(e, 'stun', { duration: sec, source: null });
+    for (const e of list) if (e.alive&&!seen.has(e)) {seen.add(e);battle.applyStatus(e,'stun',{duration:sec,source:null});}
     const R = battle.rect;
     battle.fx('shockBlast', { x: (R.c0 + R.c1) / 2, y: (R.r0 + R.r1) / 2, r: 20, src: key });
   });

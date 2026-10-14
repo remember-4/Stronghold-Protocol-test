@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g5.js — A6000 fork, 海克斯第六版 (海克斯本身、套装效果、幸运（A1–A12、7 个套装）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第六版-大扩充.md: rarities, numbers, sets and ids). Built with augR
 // (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g5.js (the battle parts,
@@ -42,7 +43,7 @@ export const DEFS = Object.freeze([
   // A12 幸运星 (小丑牌 全是 6！): shared/luck.js reads it (×2 — `mul` is the text's), in the prep and in battle
   augR('aug_lucky_star', 4, N_('幸运星'), N_('幸运 ×{mul}（带概率的海克斯：好结果的概率乘以幸运，坏结果的概率除以幸运；掷骰和随机倍率掷两次取好的）'),
     { mul: 2 }, 'both'),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): what the AUGMENT phase gives a bot

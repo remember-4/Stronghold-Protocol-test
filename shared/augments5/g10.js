@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g10.js — A6000 fork, 海克斯第六版 (技能、防御、站位、克制（G1–G25）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第六版-大扩充.md: rarities, numbers, sets and ids). Built with augR
 // (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g10.js (battle) and
@@ -75,7 +76,7 @@ export const DEFS = Object.freeze([
   // G25 防反光: 折射 here is "生效时，法术抗性+70" (ba.refraction; content/enemies/archetypes.js refraction) — no enemy
   // reflects damage, so the counter is to that RES (强折射's +RES included)
   augR('aug_vs_reflect', 1, N_('防反光'), N_('你的干员攻击「折射」敌人时，无视折射提供的法术抗性的 {pct}%'), { pct: 60 }, 'battle'),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): the plain battle numbers a bot's

@@ -20,7 +20,7 @@ const cx = (...p) => p.flat().filter(Boolean).join(' ');
  */
 export function tierChances(settings, { noPrism = false } = {}) {
   const s = enemyBuffSettings(settings);
-  const w = s.weights.map((v, i) => (noPrism && EB_TIERS[i] === 3 ? 0 : v));
+  const w = s.weights.map((v, i) => (noPrism && EB_TIERS[i] === 6 ? 0 : v));
   const sum = w.reduce((a, b) => a + b, 0);
   if (!(sum > 0)) return EB_TIERS.map((tier) => (tier === 1 ? 100 : 0));
   const raw = w.map((v) => (v * 100) / sum);
@@ -67,6 +67,13 @@ export function EnemyBuffEditor({ value, onChange, disabled = false }) {
       <${Toggle} value=${s.on} disabled=${disabled} label=${t('敌人强化')} onChange=${(on) => set({ on })} />
     </div>
     <p class="ebset__note">${t('第 {rounds} 回合全队投票，所有敌人从此获得投中的强化。每次投票先按下面的权重抽一个品质，三个选项都是这个品质。', { rounds: s.enemyRounds.join('、') || '—' })}</p>
+    <div class="ebset__row"><span class="ebset__label">${t('我方所有人海克斯品质相同')}</span>
+      <${Toggle} value=${s.samePlayerQuality} disabled=${disabled} label=${t('我方所有人海克斯品质相同')}
+        onChange=${v=>set({samePlayerQuality:v,sameBothQuality:v&&s.sameBothQuality})} /></div>
+    <div class="ebset__row"><span class="ebset__label">${t('双方海克斯品质相同')}</span>
+      <${Toggle} value=${s.sameBothQuality} disabled=${disabled||!s.samePlayerQuality} label=${t('双方海克斯品质相同')}
+        onChange=${v=>set({sameBothQuality:v})} /></div>
+    <p class="ebset__note">${t('双方同步需要先开启我方同步。同一轮按同一品质生成候选；最高档我方红对应敌方彩。双方同步时使用我方品质概率，敌方权重不参与；首次禁彩会把共同最高档降为金。')}</p>
     <p class="ebset__note">${t('逐回合选择是否新增强化；关闭某回合不会移除之前获得的强化。第14、15回合仅在进入对应战斗时生效。')}</p>
     <div class="ebset__presets">
       ${[['默认安排', { playerRounds: EB_SETTINGS_DEFAULT.playerRounds, enemyRounds: EB_SETTINGS_DEFAULT.enemyRounds, on: true }],
@@ -121,6 +128,7 @@ export function EnemyBuffStrip({ value, editable = false, busy = false, onSave =
   return html`<div class=${cx('ebstrip', !s.on && 'is-off', cls)}>
     <span class="ebstrip__label"><${Icon} name="sword" />${t('海克斯与敌方强化')}</span>
     <span class="ebstrip__sum"><small>${t('我方海克斯')}：${s.playerRounds.join('、') || '—'}<br/>${t('敌方强化')}：${s.on ? s.enemyRounds.join('、') || '—' : t('关闭')}</small>${s.on ? tierChances(s).map((p, i) => html`<b key=${i} class=${`ebstrip__tier ebset__tier--t${EB_TIERS[i]}`}>${t(EB_TIER_NAME[EB_TIERS[i]])} <span class="num">${p}%</span></b>`) : html`<b class="ebstrip__off">${t('关闭')}</b>`}
+      ${s.samePlayerQuality ? html`<small>${t('我方同品质')}${s.sameBothQuality ? ' · '+t('双方同品质') : ''}</small>` : null}
       ${s.on && s.firstNoPrism ? html`<small>${t('首次敌方强化不出彩色')}</small>` : null}</span>
     ${editable ? html`<${Button} variant="ghost" size="sm" icon="edit" class="ebstrip__edit" loading=${busy} onClick=${() => setDraft({ ...s })}>${t('调整')}<//>` : null}
     <${Modal} open=${!!draft} onClose=${() => setDraft(null)} title=${t('海克斯与敌方强化')} micro="ENEMY UPGRADES" width="7.2rem"

@@ -480,6 +480,7 @@ export function makeCtx(m, ps, source, hook, ev = null) {
     // ---- reads
     funds: () => ps.funds,
     lp: () => ps.lp,
+    exchangeFundsLife: () => {const funds=ps.funds,life=ps.lp;ps.funds=life;ps.lp=Math.max(0,funds);ps.stats.fundsGained+=Math.max(0,life-funds);ps.stats.lpLost+=Math.max(0,life-ps.lp);ps.dirty();m.markPublic();},
     alive: () => ps.alive,
     bandId: () => ps.bandId,
     shopLevel: () => ps.shop.level,

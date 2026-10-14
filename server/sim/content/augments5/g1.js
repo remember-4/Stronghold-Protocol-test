@@ -204,15 +204,9 @@ const BATTLE = {
     const from = num(p.from, 300), per = Math.max(1, num(p.per, 100)), step = 1 + pct(p.pct), top = pct(p.max) || Infinity;
     const ops = playerOps(battle, pid);
     const apply = () => {
-      const muls = [];
-      for (const b of activeBondIds(battle, pid)) {
-        const k = Math.floor((bondLayers(battle, pid, b) - from) / per);
-        if (k > 0) muls.push([b, Math.pow(step, k)]);
-      }
+      const total = activeBondIds(battle,pid).reduce((sum,b)=>sum+bondLayers(battle,pid,b),0);
       for (const u of ops) {
-        let m = 1;
-        for (const [b, x] of muls) if (isMember(battle, u, b)) m *= x;
-        m = Math.min(top, m);
+        const m = Math.min(top,Math.pow(step,Math.max(0,Math.floor((total-from)/per))));
         if (m > 1) passiveBuff(battle, u, KEY(id), { augDealtMul: m }, { visible: true });
         else if (u.findBuff(KEY(id))) battle.removeBuff(u, KEY(id));
       }

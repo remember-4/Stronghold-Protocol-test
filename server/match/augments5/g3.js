@@ -70,6 +70,8 @@ export const MATCH = Object.freeze({
     // 双倍或归零: the bet of this round (the settlement decides it)
     [DOUBLE](m, ps) {
       if (m.round === m.gd.bossRound || m.round === m.gd.hiddenRound) return fail(ERR.BAD_TARGET, 'no income after this round');
+      if((ps.counters['aug:double:uses']||0)>=4)return fail(ERR.ALREADY,'four bets per match');
+      ps.counters['aug:double:uses']=(ps.counters['aug:double:uses']||0)+1;
       ps.counters['aug:double:bet'] = m.round;
       m.tickerText(msg('{name} 押注了双倍或归零', { name: ps.name }), 1);
       return null;

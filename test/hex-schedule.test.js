@@ -45,5 +45,5 @@ test('editor exposes independent controls for all 15 rounds and preserves settin
  let next;const root=EnemyBuffEditor({value:{on:false,playerRounds:[],enemyRounds:[3],weights:[1,2,3]},onChange:v=>{next=v;}});
  const inputs=[];function visit(node){if(Array.isArray(node)){node.forEach(visit);return;}if(!node||typeof node!=='object')return;if(node.type==='input'&&node.props.type==='checkbox')inputs.push(node);visit(node.props?.children);}visit(root);
  assert.equal(inputs.length,30);assert.equal(inputs[0].props.disabled,false);assert.equal(inputs[1].props.disabled,true);
- inputs[0].props.onChange({currentTarget:{checked:true}});assert.deepEqual(next.playerRounds,[1]);assert.deepEqual(next.enemyRounds,[3]);assert.deepEqual(next.weights,[1,2,3]);assert.equal(next.on,false);
+ inputs[0].props.onChange({currentTarget:{checked:true}});assert.deepEqual(next.playerRounds,[1]);assert.deepEqual(next.enemyRounds,[3]);assert.deepEqual(next.weights,[1,0,1,1,2,1]);assert.equal(next.on,false);
 });

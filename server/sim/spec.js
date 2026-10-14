@@ -304,7 +304,7 @@ export function resultDigest(result) {
     const lg = p.layerGains && typeof p.layerGains === 'object' ? p.layerGains : {};
     return [
       pid,
-      p.killed | 0, p.total | 0, !!p.perfect, r4(p.coins),
+      p.killed | 0, p.total | 0, !!p.perfect, r4(p.coins), r4(p.hexBurnCoins||0),
       Object.keys(lg).sort().map((k) => [k, r4(lg[k])]),
       // mods included: a leak re-enters the 联防 with them (round multipliers, bounty id)
       (Array.isArray(p.leaked) ? p.leaked : []).map((l) => `${l && l.enemyKey}|${l && l.counted === false ? 0 : 1}|${(l && l.sourcePlayerId) || ''}|${modsKey(l && l.mods)}`).sort(),
@@ -364,6 +364,7 @@ export function compactResult(res) {
       perfect: !!p.perfect,
       layerGains,
       coins: Math.max(0, fnum(p.coins)),
+      hexBurnCoins: Math.max(0,fnum(p.hexBurnCoins)),
       damageDealt: Math.max(0, Math.round(fnum(p.damageDealt))),
       bossDamage: Math.max(0, Math.round(fnum(p.bossDamage))),
       healingDone: Math.max(0, Math.round(fnum(p.healingDone))),

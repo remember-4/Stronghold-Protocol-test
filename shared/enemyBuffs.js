@@ -31,11 +31,24 @@ export const VOTE_SECONDS = 25;
 /** A leader (BOSS rank) takes this share of a generic enemy upgrade's numbers (the 首领 options: all of theirs). */
 export const LEADER_SHARE = 0.5;
 /** The tiers, as the 海克斯': 1 白银, 2 黄金, 3 彩色 (TIER_NAME: the same msgids as shared/augments.js). */
-export const EB_TIERS = Object.freeze([1, 2, 3]);
-export const EB_TIER_NAME = Object.freeze({ 1: N_('白银'), 2: N_('黄金'), 3: N_('彩色') });
+export const EB_TIERS = Object.freeze([1, 2, 3, 4, 5, 6]);
+export const EB_TIER_NAME = Object.freeze({ 1: N_('白'), 2: N_('绿'), 3: N_('蓝'), 4: N_('紫'), 5: N_('金'), 6: N_('彩') });
 
+// Six visible rarities; tier stays the legacy strength band used by blind-box temporary pools.
+export const ENEMY_SET_NAMES = Object.freeze({guard:'坚壁', swift:'突进', assault:'强攻', control:'压制', disruption:'干扰', special:'特训', boss:'首领'});
+const RARITY_GROUPS = [
+ ['eb_swift','eb_range','eb_revenge','eb_trueres','eb_dash','eb_logistics','eb_inflation','eb_jinx','eb_layertax','eb_antisummon'],
+ ['eb_vigor','eb_res','eb_evasion','eb_armor','eb_fury','eb_enrage','eb_regen','eb_backup','eb_blink','eb_purify','eb_elitebreak','eb_thief','eb_standin','eb_reverse','eb_redeploy','eb_jam','eb_noheal','eb_artsward'],
+ ['eb_vanrush','eb_stealth','eb_blindbox','eb_tariff','eb_flood','eb_spdrain','eb_diminish','eb_steadfast','eb_t_fly','eb_t_times','eb_t_element','eb_t_dot','eb_t_invis','eb_t_refl'],
+ ['eb_bulwark','eb_elite','eb_reinforce','eb_shield','eb_adapt','eb_blunt','eb_charge','eb_sunder','eb_medic','eb_mark','eb_potato','eb_wanted','eb_learn','eb_promote','eb_link','eb_bondsap','eb_rush','eb_assassin','eb_bomber'],
+ ['eb_command','eb_frenzy','eb_calamity','eb_bloodmoon','eb_throttle','eb_rift'],
+ ['eb_surge','eb_steel','eb_split','eb_twins','eb_undying','eb_evolve','eb_legion'],
+];
+const BOSS_RARITIES = {eb_b_physward:1,eb_b_artsward:1,eb_b_dread:1,eb_b_awe:2,eb_b_guard:2,eb_b_rage:3,eb_b_clock:3,eb_b_escort:3,eb_b_wall:4,eb_b_summon:4,eb_b_barrier:4,eb_b_cap:5,eb_b_resonance:5,eb_b_revive:5,eb_b_tough:6,eb_b_fury:6};
+function enemyRarity(id,tier){return BOSS_RARITIES[id] || RARITY_GROUPS.findIndex(a=>a.includes(id))+1 || ({1:2,2:4,3:6})[tier];}
+function enemySet(group,boss){if(boss)return 'boss';if(group.startsWith('train'))return 'special';if(['all','phys','arts','chip','burst','mono'].includes(group))return 'guard';if(['nonblock','early','late','count','leak','coverage'].includes(group))return 'swift';if(['front','back','fragile','carry','summon','focus'].includes(group))return 'assault';if(['control','block','stall'].includes(group))return 'control';return 'disruption';}
 const eb = (id, tier, group, name, desc, params, extra = null) => Object.freeze({
-  id, tier, group, name, desc, params: Object.freeze(params), boss: false, coop: false, show: false, econ: false, faction: null, noTemp: false,
+  id, tier, rarity: enemyRarity(id,tier), set: extra?.faction ? 'special' : enemySet(group,extra?.boss), group, name, desc, params: Object.freeze(params), boss: false, coop: false, show: false, econ: false, faction: null, noTemp: false,
   ...(extra || {}),
 });
 const SHOW = { show: true };
@@ -110,7 +123,7 @@ export const ENEMY_BUFFS = Object.freeze([
   eb('eb_potato', 2, 'show', N_('烫手山芋'), N_('每回合有一个「山芋」敌人（生命 ×{hp}）：漏掉它的博士扣除 {lp} 点目标生命，下回合它带着 ×{grow} 的生命出现在下一名队友的战场；击倒它即结束传递'),
     { hp: 4.5, lp: 3, grow: 1.5 }, COOP_SHOW),
   eb('eb_wanted', 2, 'carry', N_('通缉令'), N_('每名博士上回合造成伤害最多的干员被通缉：敌人优先攻击它，对它造成的伤害 +{pct}%'), { pct: 85 }, SHOW),
-  eb('eb_blindbox', 2, 'luck', N_('盲盒'), N_('每回合开战时，敌人随机获得一项白银强化，只在本回合有效'), {}, { show: true, noTemp: true }),
+  eb('eb_blindbox', 2, 'luck', N_('盲盒'), N_('每回合开战时，敌人随机获得一项白/绿/蓝档基础强化，只在本回合有效'), {}, { show: true, noTemp: true }),
   eb('eb_tariff', 2, 'econ', N_('关税'), N_('每回合第 {from} 名及以后购买的干员价格 +{funds}'), { from: 4, funds: 1 }, ECON),
   // third version (B1–B8)
   eb('eb_spdrain', 2, 'skill', N_('精神污染'), N_('我方干员每受到 1 次攻击失去 {sp} 点技力'), { sp: 1 }),
@@ -131,7 +144,7 @@ export const ENEMY_BUFFS = Object.freeze([
   eb('eb_undying', 3, 'all', N_('不灭'), N_('非领袖敌人第一次被击倒时，有 {prob}% 概率以 {hp}% 生命原地复活'), { prob: 85, hp: 50 }),
   eb('eb_frenzy', 3, 'front', N_('狂热'), N_('所有敌人移动速度 +{move}%、攻击速度 +{aspd}'), { move: 35, aspd: 52 }),
   eb('eb_calamity', 3, 'fragile', N_('天灾'), N_('每 {sec} 秒，随机 {n} 名干员受到其最大生命 {pct}% 的真实伤害'), { sec: 30, n: 3, pct: 52 }),
-  eb('eb_bloodmoon', 3, 'luck', N_('血月'), N_('从现在起，每回合开战时敌人随机获得一项黄金强化，只在本回合有效'), {}, { show: true, noTemp: true }),
+  eb('eb_bloodmoon', 3, 'luck', N_('血月'), N_('从现在起，每回合开战时敌人随机获得一项蓝/紫档进阶强化，只在本回合有效'), {}, { show: true, noTemp: true }),
   eb('eb_throttle', 3, 'econ', N_('限流'), N_('每回合因效果获得的资金超过 {cap} 时，超出部分减半'), { cap: 6 }, ECON),
   // third version (C1–C3)
   eb('eb_evolve', 3, 'stall', N_('进化'), N_('敌人在场每 {sec} 秒，受到的伤害 −{pct}%（至多 −{max}%）'), { sec: 10, pct: 8, max: 40 }),
@@ -155,6 +168,20 @@ export const ENEMY_BUFFS = Object.freeze([
   eb('eb_b_cap', 2, 'boss_burst', N_('首领·限伤'), N_('领袖战的限伤线从 {from} 万降到 {to} 万：单次伤害达到 {to} 万就整次作废（破限按 {brk} 万计算）'), { from: 30, to: 20, brk: 10 }, BOSS),
   eb('eb_b_resonance', 2, 'boss_guard', N_('首领·共鸣'), N_('每有 1 名护卫存活，领袖受到的伤害 −{pct}%（至多 −{max}%）'), { pct: 8, max: 40 }, BOSS),
   eb('eb_b_revive', 3, 'boss_revive', N_('首领·复苏'), N_('领袖第一次降到 {hpPct}% 生命时，回复共享血池的 {pct}%（每场一次）'), { hpPct: 30, pct: 10 }, BOSS),
+  eb('eb_n_health',1,'all',N_('预备体能'),N_('非领袖敌人生命 +10%（领袖无效）'),{},{rarity:1,noTemp:true,boss:false,revisionMods:{"hpMul": 1.1}}),
+  eb('eb_n_power',1,'front',N_('武器维护'),N_('敌人攻击 +8%（领袖减半）'),{},{rarity:1,noTemp:true,boss:false,revisionMods:{"atkMul": 1.08}}),
+  eb('eb_n_speed',1,'nonblock',N_('轻装行军'),N_('敌人移动速度 +15%（领袖减半）'),{},{rarity:2,noTemp:true,boss:false,revisionMods:{"moveMul": 1.15}}),
+  eb('eb_n_defense',1,'all',N_('加固装甲'),N_('敌人防御 +25%（领袖减半）'),{},{rarity:2,noTemp:true,boss:false,revisionMods:{"defMul": 1.25}}),
+  eb('eb_n_arts',2,'all',N_('抗法涂层'),N_('敌人受到的法术伤害降低18%（领袖减半）'),{},{rarity:3,noTemp:true,boss:false,revisionMods:{"artsTakenMul": 0.82}}),
+  eb('eb_n_phys',2,'all',N_('缓冲结构'),N_('敌人受到的物理伤害降低18%（领袖减半）'),{},{rarity:3,noTemp:true,boss:false,revisionMods:{"physTakenMul": 0.82}}),
+  eb('eb_n_regen',2,'all',N_('修复组织'),N_('非领袖敌人每秒回复1%最大生命（领袖无效）'),{},{rarity:4,noTemp:true,boss:false,revisionMods:{"hpRegenRatio": 0.01}}),
+  eb('eb_n_shatter',2,'front',N_('破盾武装'),N_('敌人对持有护盾的干员造成的伤害增加35%（领袖减半）'),{},{rarity:4,noTemp:true,boss:false,revisionMods:{}}),
+  eb('eb_n_element',3,'element',N_('元素隔离'),N_('敌人受到的元素损伤积累降低30%（领袖减半；不改变敌方对我方的损伤）'),{},{rarity:5,noTemp:true,boss:false,revisionMods:{"elemTakenMul": 0.7}}),
+  eb('eb_n_slow',3,'control',N_('沉重空气'),N_('我方干员攻击间隔增加15%'),{},{rarity:5,noTemp:true,boss:false,revisionMods:{}}),
+  eb('eb_n_wall',3,'all',N_('绝境壁垒'),N_('敌人受到的物理、法术、真实伤害降低25%（领袖减半）'),{},{rarity:6,noTemp:true,boss:false,revisionMods:{"dmgTakenMul": 0.75}}),
+  eb('eb_n_hunter',3,'front',N_('乘虚追猎'),N_('敌人对晕眩、冻结、沉睡、束缚、恐惧或浮空中的干员造成伤害增加40%（领袖减半）'),{},{rarity:6,noTemp:true,boss:false,revisionMods:{}}),
+  eb('eb_n_b_guard',1,'boss',N_('首领·战术装甲'),N_('领袖防御 +30%'),{},{rarity:2,noTemp:true,boss:true,revisionMods:{"defMul": 1.3}}),
+  eb('eb_n_b_doom',3,'boss',N_('首领·终局攻势'),N_('领袖攻击 +50%、攻击间隔缩短25%'),{},{rarity:6,noTemp:true,boss:true,revisionMods:{"atkMul": 1.5, "intervalMul": 0.75}}),
 ]);
 
 const EB_INDEX = new Map(ENEMY_BUFFS.map((b) => [b.id, b]));
@@ -175,14 +202,20 @@ export const isBossVoteRound = (round, bossRound) => isVoteRound(round) && Numbe
 export const EB_WEIGHT_MAX = 100;
 /** The defaults: votes on, 白银 60 / 黄金 30 / 彩色 10, no 彩色 on the first vote (round 4). */
 export const CONFIGURABLE_ROUNDS = Object.freeze(Array.from({ length: 15 }, (_, i) => i + 1));
-export const EB_SETTINGS_DEFAULT = Object.freeze({ on: true, weights: Object.freeze([60, 30, 10]), firstNoPrism: true,
+export const EB_SETTINGS_DEFAULT = Object.freeze({ on: true, weights: Object.freeze([30, 30, 15, 15, 7, 3]), firstNoPrism: true, samePlayerQuality: false, sameBothQuality: false,
   playerRounds: Object.freeze(CONFIGURABLE_ROUNDS.slice(0, 13)), enemyRounds: VOTE_ROUNDS });
 const isRounds = (v) => Array.isArray(v) && v.every((r) => Number.isInteger(r) && CONFIGURABLE_ROUNDS.includes(r)) && new Set(v).size === v.length;
 const rounds = (v, fallback) => Object.freeze((isRounds(v) ? v : fallback).slice().sort((a, b) => a - b));
 
 const isWeight = (v) => Number.isInteger(v) && v >= 0 && v <= EB_WEIGHT_MAX;
-const isWeights = (w) => Array.isArray(w) && w.length === EB_TIERS.length && w.every(isWeight) && w.reduce((a, b) => a + b, 0) > 0;
+const isWeights = (w) => Array.isArray(w) && [3, EB_TIERS.length].includes(w.length) && w.every(isWeight) && w.reduce((a, b) => a + b, 0) > 0;
 
+export function normalizeEnemyWeights(w) {
+  if(!isWeights(w))return EB_SETTINGS_DEFAULT.weights.slice();
+  if(w.length===6)return w.slice();
+  const split=(v,p)=>[Math.round(v*p),v-Math.round(v*p)];
+  return [...split(w[0],.5),...split(w[1],.5),...split(w[2],.7)];
+}
 /**
  * Strict check of a settings object a client sends (room.create / room.setEnemyBuffs, shared/protocol.js): every field
  * optional, but a present one well-formed — `on` / `firstNoPrism` booleans, `weights` [白银, 黄金, 彩色] whole numbers
@@ -190,6 +223,9 @@ const isWeights = (w) => Array.isArray(w) && w.length === EB_TIERS.length && w.e
  */
 export function isEnemyBuffSettings(v) {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return false;
+  if (v.samePlayerQuality !== undefined && typeof v.samePlayerQuality !== 'boolean') return false;
+  if (v.sameBothQuality !== undefined && typeof v.sameBothQuality !== 'boolean') return false;
+  if (v.sameBothQuality === true && v.samePlayerQuality !== true) return false;
   if (v.on !== undefined && typeof v.on !== 'boolean') return false;
   if (v.firstNoPrism !== undefined && typeof v.firstNoPrism !== 'boolean') return false;
   if (v.weights !== undefined && !isWeights(v.weights)) return false;
@@ -204,7 +240,9 @@ export function enemyBuffSettings(v) {
   const d = EB_SETTINGS_DEFAULT;
   return Object.freeze({
     on: typeof o.on === 'boolean' ? o.on : d.on,
-    weights: Object.freeze(isWeights(o.weights) ? o.weights.slice() : d.weights.slice()),
+    weights: Object.freeze(normalizeEnemyWeights(o.weights)),
+    samePlayerQuality: o.samePlayerQuality === true,
+    sameBothQuality: o.samePlayerQuality === true && o.sameBothQuality === true,
     playerRounds: rounds(o.playerRounds, d.playerRounds),
     enemyRounds: rounds(o.enemyRounds, d.enemyRounds),
     firstNoPrism: typeof o.firstNoPrism === 'boolean' ? o.firstNoPrism : d.firstNoPrism,
@@ -214,7 +252,7 @@ export function enemyBuffSettings(v) {
 /** Whether two settings objects mean the same (after the defaults). */
 export function sameEnemyBuffSettings(a, b) {
   const x = enemyBuffSettings(a), y = enemyBuffSettings(b);
-  return x.on === y.on && x.firstNoPrism === y.firstNoPrism && x.weights.every((w, i) => w === y.weights[i]) && ['playerRounds', 'enemyRounds'].every((k) => x[k].length === y[k].length && x[k].every((r, i) => r === y[k][i]));
+  return x.samePlayerQuality === y.samePlayerQuality && x.sameBothQuality === y.sameBothQuality && x.on === y.on && x.firstNoPrism === y.firstNoPrism && x.weights.every((w, i) => w === y.weights[i]) && ['playerRounds', 'enemyRounds'].every((k) => x[k].length === y[k].length && x[k].every((r, i) => r === y[k][i]));
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -225,7 +263,8 @@ export function sameEnemyBuffSettings(a, b) {
  * Nothing left to draw (only 彩色 had weight) → 白银.
  */
 export function rollVoteTier(weights, rng, { noPrism = false } = {}) {
-  const w = EB_TIERS.map((t, i) => (t === 3 && noPrism ? 0 : Math.max(0, Number(weights && weights[i]) || 0)));
+  const normalized=normalizeEnemyWeights(weights);
+  const w = EB_TIERS.map((t,i)=>t===6&&noPrism?0:normalized[i]);
   const sum = w.reduce((a, b) => a + b, 0);
   if (!(sum > 0)) return 1;
   let r = rng() * sum;
@@ -252,10 +291,10 @@ export function rollVoteOptions(chosen, rng, opts = VOTE_OPTIONS) {
   const n = Number.isInteger(o.n) && o.n > 0 ? o.n : VOTE_OPTIONS;
   const have = new Set(chosen || []);
   const pool = ENEMY_BUFFS.filter((d) => !!d.boss === !!o.boss && (!o.allowed || o.allowed(d)));
-  const tiers = o.tier ? [o.tier, ...EB_TIERS.filter((t) => t !== o.tier).sort((a, b) => Math.abs(a - o.tier) - Math.abs(b - o.tier) || a - b)] : [null];
+  const tiers = o.tier ? [o.tier, ...(o.strict ? [] : EB_TIERS.filter((t) => t !== o.tier).sort((a, b) => Math.abs(a - o.tier) - Math.abs(b - o.tier) || a - b))] : [null];
   const out = [];
   for (const t of tiers) {
-    const left = pool.filter((d) => (t == null || d.tier === t) && !out.includes(d));
+    const left = pool.filter((d) => (t == null || d.rarity === t) && !out.includes(d));
     while (out.length < n && left.length) {
       const groups = new Set(out.map((d) => d.group));
       const fresh = (d) => !have.has(d.id);

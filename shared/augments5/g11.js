@@ -1,3 +1,4 @@
+import { reviseAugment } from '../hexRevision.js';
 // shared/augments5/g11.js — A6000 fork, 海克斯第六版 (规则级与同盟（H1–H7、I1–I14）): the definitions of this batch
 // (_ops/stronghold-a6000/analysis/海克斯第六版-大扩充.md: rarities, numbers, sets and ids). Built with augR
 // (shared/augmentDef.js): rarity 1…6 = 白 绿 蓝 紫 金 红. The effects: server/sim/content/augments5/g11.js (battle, prep)
@@ -52,7 +53,7 @@ export const DEFS = Object.freeze([
   augR('aug_split_bill', 2, N_('公摊'), N_('你升级调度中心时，每名队友替你付 {funds} 资金（他没钱就不付），这部分升级费立即退还给你'), { funds: 1 }, 'meta', COOP),
   augR('aug_usurp', 6, N_('篡位'), N_('拿到时成为「队长」：之后敌人强化投票只算你的一票；每回合开始时，每名队友交给你 {funds} 资金（不足 {funds} 不交）'),
     { funds: 1 }, 'meta', COOP),
-]);
+].map(reviseAugment));
 
 /**
  * Bot preference of this batch's augments (server/match/match/augments.js BOT_AUGMENT): the rule-level ones a board uses

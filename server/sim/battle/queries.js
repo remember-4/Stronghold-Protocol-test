@@ -100,7 +100,7 @@ export class BattleQueries {
       if (a !== healer && ((a.s.flags.noHeal && !(through && through(healer, a))) || (a.profile && a.profile.noHeal))) continue;
       const injured = a.hp < a.s.maxHp - 1e-6;
       const elem = includeElement && (a.elem.burn + a.elem.neural + a.elem.necrosis + a.elem.apoptosis + a.elem.erosion) > 0;
-      if (injured || elem) out.push(a);
+      if (injured || elem || healer?.s.flags.hexFullHeal) out.push(a);
     }
     out.sort((a, b) => a.hpRatio - b.hpRatio || a.deploySeq - b.deploySeq);
     return out;
@@ -236,20 +236,20 @@ export class BattleQueries {
    */
   _refreshRange(u) {
     const tg = u.skill && u.skill.active ? u.skill.spec.targeting : null;
-    const grid = (tg && tg.rangeGrid) || u.rangeGrid || [[0, 0]];
-    const ext = (tg && tg.noRangeExtend ? 0 : u.s.rangeExtend) + ((tg && tg.rangeExtend) || 0);
+    const grid = u.s.flags.hexMeleeRange ? [[0,1]] : (tg && tg.rangeGrid) || u.rangeGrid || [[0, 0]];
+    const ext = u.s.flags.hexMeleeRange ? 0 : (tg && tg.noRangeExtend ? 0 : u.s.rangeExtend) + ((tg && tg.rangeExtend) || 0);
     u._rangeExtend = u.s.rangeExtend;
     u._baseExtend = u.s.baseRangeExtend;
     const keys = absoluteRangeKeys(grid, u.tileR, u.tileC, u.dir, ext);
     const set = new Set(keys);
-    const extra = u.extraRangeKeys;
+    const extra = u.s.flags.hexMeleeRange ? null : u.extraRangeKeys;
     if (extra) for (const k of extra) if (!set.has(k)) { set.add(k); keys.push(k); }
     u.rangeKeys = keys;
     u.rangeKeySet = set;
-    const own = !!(tg && tg.showOwnRange);
+    const own = !u.s.flags.hexMeleeRange && !!(tg && tg.showOwnRange);
     const lg = own ? u.rangeGrid || [[0, 0]] : grid, le = own ? u.s.rangeExtend : ext;
     u.liveRangeGrid = le > 0 ? extendedGrid(lg, le) : lg;
-    if (u.kind !== 'device') u.baseRangeKeys = absoluteRangeKeys(u.rangeGrid || [[0, 0]], u.tileR, u.tileC, u.dir, u.s.baseRangeExtend);
+    if (u.kind !== 'device') u.baseRangeKeys = absoluteRangeKeys(u.s.flags.hexMeleeRange ? [[0,1]] : u.rangeGrid || [[0, 0]], u.tileR, u.tileC, u.dir, u.s.flags.hexMeleeRange ? 0 : u.s.baseRangeExtend);
     if (u.skill) u.skill._trigKeys = null; // CUSTOM_RANGE trigger grid is relative to the tile
   }
 

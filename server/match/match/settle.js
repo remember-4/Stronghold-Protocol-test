@@ -65,6 +65,8 @@ export class MatchSettle {
         ps.stats.dmgDealt += Number(up.damageDealt) || 0;
         ps.stats.kills += Number(up.killed) || 0;
       }
+      const burnCoins=(Number(r.hexBurnCoins)||0)+(Number(up?.hexBurnCoins)||0);
+      coins=Math.max(0,coins-Math.max(0,burnCoins-3));
       // perfect-payout bounties (战术特训): own phase perfect
       for (const b of ps.bounties) if (b.card.payout === 'perfect' && counted === 0 && r.perfect !== false) coins += b.card.coin;
       if (coins > 0) { ps.pendingFunds += coins; ps.stats.fundsGained += coins; }

@@ -467,7 +467,7 @@ function redPacket(m, ps) {
   const cost = int(p.cost, 2);
   if (!mates.length || ps.funds < cost) return;
   ps.addFunds(-cost, { reason: 'augment:aug_red_packet' });
-  const pot = Math.max(mates.length, int(p.pot, 4));
+  const pot = Math.max(mates.length,m.alivePlayers().length + 2);
   const share = new Map(mates.map((t) => [t, 1]));
   for (let left = pot - mates.length; left > 0; left--) { const t = pickOne(m, mates); share.set(t, share.get(t) + 1); }
   let best = null;

@@ -1,3 +1,4 @@
+import { installEnemyHexRevision } from './enemyHexRevision.js';
 // server/sim/content/enemyBuffs.js — A6000 fork: 敌人强化 (the enemies' upgrades) in battle, second version (by tier;
 // the definitions and numbers: shared/enemyBuffs.js; the vote, the spawns a battle starts with, LP and funds:
 // server/match/match/enemyVotes.js).
@@ -743,7 +744,7 @@ export function install(battle) {
   const R = f.ebRound && typeof f.ebRound === 'object' ? f.ebRound : {};
   const ids = [...(Array.isArray(f.enemyBuffs) ? f.enemyBuffs : []), ...(Array.isArray(R.extra) ? R.extra : [])];
   const counts = enemyBuffCounts(ids);
-  if (counts.size) installEnemyBuffs(battle, counts, R);
+  if (counts.size) { installEnemyBuffs(battle, counts, R); installEnemyHexRevision(battle,counts); }
 }
 
 /**
