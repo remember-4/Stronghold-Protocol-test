@@ -35,22 +35,28 @@ export const KIT_FILES = Object.freeze([
     'chess_char_2_05-harold.js', 'chess_char_2_06-papyrs.js', 'chess_char_2_07-ghost.js', 'chess_char_2_08-bubble.js',
     'chess_char_2_09-humus.js', 'chess_char_2_10-rockr.js', 'chess_char_2_11-kazema.js', 'chess_char_2_12-gravel.js',
     'chess_char_2_13-tippi.js', 'chess_char_2_14-flower.js', 'chess_char_2_15-akkord.js', 'chess_char_2_16-whitew.js',
-    'chess_char_2_17-branch.js', 'chess_char_2_18-ashlok.js', 'chess_char_2_19-tinman.js'],
+    'chess_char_2_17-branch.js', 'chess_char_2_18-ashlok.js', 'chess_char_2_19-tinman.js',
+    // the friend's 萨卡兹 roster (docs/SARKAZ-UPDATE.md)
+    'chess_char_2_sarkaz_threye-threye.js'],
   // tier 3
   ['chess_char_3_01-angel.js', 'chess_char_3_02-ayer.js', 'chess_char_3_03-swire.js', 'chess_char_3_04-swire2.js',
     'chess_char_3_05-skadi.js', 'chess_char_3_06-philae.js', 'chess_char_3_07-forcer.js', 'chess_char_3_08-mint.js',
     'chess_char_3_09-haini.js', 'chess_char_3_10-pinecn.js', 'chess_char_3_11-snhunt.js', 'chess_char_3_12-blemsh.js',
     'chess_char_3_13-malist.js', 'chess_char_3_14-slbell.js', 'chess_char_3_15-vodfox.js', 'chess_char_3_16-snakek.js',
     'chess_char_3_17-shotst.js', 'chess_char_3_18-vulpis.js', 'chess_char_3_19-vigil.js', 'chess_char_3_20-kjera.js',
-    'chess_char_3_21-archet.js'],
+    'chess_char_3_21-archet.js',
+    // the friend's 萨卡兹 roster (docs/SARKAZ-UPDATE.md)
+    'chess_char_3_sarkaz_hodrer-hodrer.js', 'chess_char_3_sarkaz_closur-closur.js'],
   // tier 4
-  ['chess_char_4_custom_vvana.js', 'chess_char_4_01-rmixer.js', 'chess_char_4_02-mostma.js', 'chess_char_4_03-kjera.js', 'chess_char_4_04-ines.js',
+  ['chess_char_4_01-rmixer.js', 'chess_char_4_02-mostma.js', 'chess_char_4_03-kjera.js', 'chess_char_4_04-ines.js',
     'chess_char_4_05-beewax.js', 'chess_char_4_06-kroos2.js', 'chess_char_4_07-bpipe.js', 'chess_char_4_08-rosesa.js',
     'chess_char_4_09-mizuki.js', 'chess_char_4_10-aroma.js', 'chess_char_4_11-cathy.js', 'chess_char_4_12-glady.js',
     'chess_char_4_13-gnosis.js', 'chess_char_4_14-lionhd.js', 'chess_char_4_15-reckpr.js', 'chess_char_4_16-texas2.js',
     'chess_char_4_17-hsguma.js', 'chess_char_4_18-mudrok.js', 'chess_char_4_19-flamtl.js', 'chess_char_4_20-fartth.js',
     'chess_char_4_21-plosis.js', 'chess_char_4_22-svrash.js', 'chess_char_4_23-gvial2.js', 'chess_char_4_24-billro.js',
-    'chess_char_4_25-cetsyr.js', 'chess_char_4_26-bldsk.js'],
+    'chess_char_4_25-cetsyr.js', 'chess_char_4_26-bldsk.js',
+    // the friend's 元素 roster (docs/ELEMENT-BOND.md)
+    'chess_char_4_vvana-vvana.js'],
   // tier 5
   ['chess_char_5_01-excu2.js', 'chess_char_5_02-titi.js', 'chess_char_5_03-blaze2.js', 'chess_char_5_04-bldsk.js',
     'chess_char_5_05-ulpia.js', 'chess_char_5_06-etlchi.js', 'chess_char_5_07-surtr.js', 'chess_char_5_08-horn.js',
@@ -59,12 +65,15 @@ export const KIT_FILES = Object.freeze([
     'chess_char_5_17-f12yin.js', 'chess_char_5_18-gvial2.js', 'chess_char_5_19-mlynar.js', 'chess_char_5_20-aglina.js',
     'chess_char_5_21-sntlla.js', 'chess_char_5_22-nymph.js', 'chess_char_5_23-reckpr.js'],
   // tier 6 (and 盟约·辅助干员 chess_char_1_15, a hidden tier-1 chess always registered with the tier-6 kits)
-  ['chess_char_6_sarkaz.js', 'chess_char_6_custom_clemnt.js', 'chess_char_6_custom_phatm2.js', 'chess_char_1_15-pithst.js', 'chess_char_6_01-lemuen.js', 'chess_char_6_02-sbell2.js', 'chess_char_6_03-yu.js',
+  ['chess_char_1_15-pithst.js', 'chess_char_6_01-lemuen.js', 'chess_char_6_02-sbell2.js', 'chess_char_6_03-yu.js',
     'chess_char_6_04-skadi2.js', 'chess_char_6_05-pasngr.js', 'chess_char_6_06-pepe.js', 'chess_char_6_07-siege2.js',
     'chess_char_6_08-reed2.js', 'chess_char_6_09-cello.js', 'chess_char_6_10-nymph.js', 'chess_char_6_11-mlyss.js',
     'chess_char_6_12-rosmon.js', 'chess_char_6_13-angel2.js', 'chess_char_6_14-lumen.js', 'chess_char_6_15-qiubai.js',
     'chess_char_6_16-halo2.js', 'chess_char_6_17-nearl2.js', 'chess_char_6_18-whitw2.js', 'chess_char_6_19-blkkgt.js',
-    'chess_char_6_20-agoat2.js'],
+    'chess_char_6_20-agoat2.js',
+    // the friend's 元素 and 萨卡兹 rosters (docs/ELEMENT-BOND.md, docs/SARKAZ-UPDATE.md)
+    'chess_char_6_clemnt-clemnt.js', 'chess_char_6_phatm2-phatm2.js', 'chess_char_6_sarkaz_typhon-typhon.js',
+    'chess_char_6_sarkaz_wisdel-wisdel.js'],
 ].map((group) => Object.freeze(group)));
 
 /**
@@ -79,7 +88,6 @@ export const STANDIN_KIT_FILES = Object.freeze(['standin-acguad.js', 'standin-sh
  * data/backups.json; a new file is appended). An operator without a file is not offered as a 自选 pick (KITTED_CHARS).
  */
 export const OPERATOR_KIT_FILES = Object.freeze([
-  'op-threye.js',
   'op-siege.js',
   'op-chen.js',
   'op-irene.js',
@@ -145,7 +153,6 @@ export const OPERATOR_KIT_FILES = Object.freeze([
   'op-radian.js',
   'op-slent2.js',
   'op-haruka.js',
-  'op-clemnt.js',
   'op-phatm2.js',
   'op-ironmn.js',
   'op-nasti.js',
@@ -194,8 +201,16 @@ export const OPERATOR_KITS = Object.freeze(Object.assign({}, ...OPERATOR_MODULES
 export const KITS = Object.freeze(Object.assign({}, ...TIER_KITS, STANDIN_KITS, OPERATOR_KITS));
 
 /**
- * Every character a 自选 pick may field with a faithful kit: the 预备干员 (GENERIC_KIT_CHARS), the stand-ins with a kit
- * file and the operators of OPERATOR_KIT_FILES whose file loaded. The `kitted` option of shared/diy.js diyPool /
- * validateDiyPicks.
+ * The owned 6★ the friend's 萨卡兹 update moved into the shop (docs/SARKAZ-UPDATE.md "从自选名单移入默认卡池"): their kit files
+ * stay (their chess fight with them, shared/opChess.js) but they are no 自选 pick any more. 薇薇安娜 and 酒神, chess since the
+ * friend's 元素, stay picks (docs/ELEMENT-BOND.md "原自选干员配置保留").
  */
-export const KITTED_CHARS = Object.freeze([...new Set([...GENERIC_KIT_CHARS, ...Object.keys(STANDIN_KITS), ...Object.keys(OPERATOR_KITS)])].filter(id=>!['char_4228_closur','char_2012_typhon','char_1035_wisdel','char_4088_hodrer'].includes(id)));
+export const SHOP_NOT_PICKS = Object.freeze(['char_4228_closur', 'char_2012_typhon', 'char_1035_wisdel', 'char_4088_hodrer']);
+
+/**
+ * Every character a 自选 pick may field with a faithful kit: the 预备干员 (GENERIC_KIT_CHARS), the stand-ins with a kit
+ * file and the operators of OPERATOR_KIT_FILES whose file loaded, but SHOP_NOT_PICKS. The `kitted` option of shared/diy.js
+ * diyPool / validateDiyPicks.
+ */
+export const KITTED_CHARS = Object.freeze([...new Set([...GENERIC_KIT_CHARS, ...Object.keys(STANDIN_KITS), ...Object.keys(OPERATOR_KITS)])]
+  .filter((id) => !SHOP_NOT_PICKS.includes(id)));

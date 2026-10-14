@@ -4,9 +4,11 @@ import { playerOps, passiveBuff } from './support/index.js';
 const boss = e => e.isBoss || e.def?.rank === 'BOSS' || e.def?.raw?.rank === 'BOSS';
 export function installEnemyHexRevision(b,counts) {
   const n=id=>counts.get(id)||0;
-  b.on('enemySpawn',({enemy:e})=>{
+  // (only the upgrades of the revision install anything: a battle without them keeps its hooks and runs as before)
+  const defs=ENEMY_BUFFS.filter(d=>n(d.id)&&d.revisionMods&&Object.keys(d.revisionMods).length);
+  if(defs.length)b.on('enemySpawn',({enemy:e})=>{
     if(!e?.alive)return;
-    for(const d of ENEMY_BUFFS){const k=n(d.id);if(!k||!d.revisionMods||d.boss&&!boss(e))continue;
+    for(const d of defs){const k=n(d.id);if(d.boss&&!boss(e))continue;
       const share=d.boss?1:boss(e)?LEADER_SHARE:1, mods={};
       for(const [prop,value] of Object.entries(d.revisionMods)){
         if((prop==='hpMul'||prop==='hpRegenRatio')&&(boss(e)||e.bossPool))continue;

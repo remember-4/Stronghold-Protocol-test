@@ -245,9 +245,10 @@ function soulSwap(m, ps) {
 
 /** 偷命: the LPs swapped with the teammate with the most, when it has more — never taking it below `floor`. */
 function lifeSwap(m, ps) {
-  const floor = int(P('aug_life_swap').floor, 6);
   const top = matesOf(m, ps).sort((a, b) => b.lp - a.lp || a.seat - b.seat)[0];
   if (!top || !(top.lp > ps.lp)) return;
+  // (the floor drops with the holder's grudges against him: m.teamFloor)
+  const floor = m.teamFloor(ps, top, int(P('aug_life_swap').floor, 6));
   const moved = Math.min(top.lp - ps.lp, Math.max(0, top.lp - floor));
   if (!(moved > 0)) return;
   top.lp -= moved;
@@ -389,7 +390,7 @@ function protection(m, ps) {
   let got = 0;
   for (const t of matesOf(m, ps)) {
     if (!(t.funds > mine)) continue;
-    const n = -t.addFunds(-int(p.funds, 1), { reason: 'augment:aug_protection' });
+    const n = -t.addFunds(-(int(p.funds, 1) + m.teamRevengeBonus(ps, t)), { reason: 'augment:aug_protection' });
     if (!(n > 0)) continue;
     got += n;
     m.teamGrudge(t, ps);
@@ -423,7 +424,7 @@ function pickpocket(m, ps) {
     m.tickerText(msg('{a} 顺走了 {b} 的{item}', { a: ps.name, b: v.name, item: dn(m.gd.item(it.id)?.name || '') }), 1);
     return;
   }
-  const n = -v.addFunds(-int(p.funds, 1), { reason: 'augment:aug_pickpocket' });
+  const n = -v.addFunds(-(int(p.funds, 1) + m.teamRevengeBonus(ps, v)), { reason: 'augment:aug_pickpocket' });
   if (!(n > 0)) return;
   ps.addFunds(n, { reason: 'augment:aug_pickpocket' });
   m.teamGrudge(v, ps);
@@ -445,7 +446,8 @@ function absorb(m, ps) {
   const v = m.teamPickVictim(ps, matesOf(m, ps).filter((t) => { const b = topBond(m, t); return b && (t.layers[b] || 0) >= min; }));
   if (!v) return;
   const vb = topBond(m, v);
-  const n = Math.min(room, v.layers[vb] || 0);
+  // (报复加码: +2 layers from someone the holder holds 3+ grudges against)
+  const n = Math.min(layerGainRoom(ps.layers[mine] || 0, int(p.layer, 5) + 2 * m.teamRevengeBonus(ps, v)), v.layers[vb] || 0);
   v.layers[vb] = (v.layers[vb] || 0) - n;
   v.recompute();
   v.dirty();
@@ -664,11 +666,12 @@ function extortions(m, st, perfect) {
     if (!t) continue;
     h.counters['aug5:extort:n'] = used + 1;
     showLeft(h, 'aug_extort', max - used - 1);
-    st.dues.push({ augment: 'aug_extort', from: t.playerId, to: h.playerId, amount: n });
+    const bill = n + m.teamRevengeBonus(h, t);
+    st.dues.push({ augment: 'aug_extort', from: t.playerId, to: h.playerId, amount: bill });
     m.teamGrudge(t, h);
     m.teamShow(h, 'extort');
-    fx(m, 'extort', t, h, { amount: n });
-    m.tickerText(msg('{a} 讹了 {b} {n} 资金（下回合开始时结算）', { a: h.name, b: t.name, n }), 1);
+    fx(m, 'extort', t, h, { amount: bill });
+    m.tickerText(msg('{a} 讹了 {b} {n} 资金（下回合开始时结算）', { a: h.name, b: t.name, n: bill }), 1);
   }
 }
 
@@ -856,7 +859,7 @@ export const MATCH = Object.freeze({
       const used = int(ps.counters['aug5:sell_out:n']);
       if (used >= max) return fail(ERR.BAD_TARGET, 'no sale left');
       const lp = int(p.lp, 1);
-      if (t.lp - lp < int(p.floor, 6)) return fail(ERR.BAD_TARGET, 'teammate LP too low');
+      if (t.lp - lp < m.teamFloor(ps, t, int(p.floor, 6))) return fail(ERR.BAD_TARGET, 'teammate LP too low');
       t.lp -= lp;
       t.stats.lpLost += lp;
       t.dirty();

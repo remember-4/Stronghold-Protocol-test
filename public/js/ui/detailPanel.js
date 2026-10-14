@@ -442,7 +442,9 @@ export function ChessDetail({ chess, piece, unit, snapHp, editable, onSell, bond
         <${BondChips} bondIds=${bondIds} bonds=${bonds} off=${offBonds} onBond=${onBond} granted=${grantedIds} />
       </div>
     </div>`;
-  blocks.garrison = garrisons.length ? html`<div key="garrison">${garrisons.map((garrison) => html`<${GarrisonBlock} key=${garrison.garrisonId} garrison=${garrison} m=${m} />`)}</div>` : null;
+  // (every 特质 of the operator — 史尔特尔 has two; a single one is the block itself)
+  blocks.garrison = garrisons.length === 1 ? html`<${GarrisonBlock} key="garrison" garrison=${garrisons[0]} m=${m} />`
+    : garrisons.length ? html`<div key="garrison">${garrisons.map((garrison) => html`<${GarrisonBlock} key=${garrison.garrisonId} garrison=${garrison} m=${m} />`)}</div>` : null;
   blocks.trait = body.trait?.desc ? html`<p key="trait" class="dtrait"><${Icon} name="info" /><${RichText} text=${traitText(body, golden, lo)} /></p>` : null;
   // (`fr` is the body the unit fights with — a stand-in's record for a 补位 chess; `chess` is only the range's fallback)
   blocks.stats = chessStatsBlock({ rec: fr, chess: c, live });

@@ -90,6 +90,8 @@ export const SHOW_TITLES = Object.freeze([
   { id: 'show_life_swap', augment: 'aug_life_swap', key: 'lifeswap', name: N_('偷天换日'), text: N_('和队友换了命') },
   { id: 'show_mole', augment: 'aug_mole', key: 'mole', name: N_('内鬼'), text: N_('当了内鬼') },
   { id: 'show_steal_credit', augment: 'aug_steal_credit', key: 'credit', name: N_('抢功王'), text: N_('抢走队友的悬赏资金最多') },
+  // 记仇的互动 (2026-10-11): whoever settled the most grudges — any 损人利己 海克斯 can (no single augment)
+  { id: 'show_avenger', augment: null, key: 'revenge', name: N_('复仇者'), text: N_('报复队友次数最多') },
 ]);
 
 /**
@@ -101,7 +103,7 @@ export function assignShowTitles(players, titles) {
   const held = new Set(players.flatMap((ps) => (Array.isArray(ps.augments) ? ps.augments : [])));
   const cands = [];
   SHOW_TITLES.forEach((t, ti) => {
-    if (!held.has(t.augment)) return;
+    if (t.augment && !held.has(t.augment)) return;
     const vals = players.map((ps) => ({ ps, v: Number(ps.counters && ps.counters[`show:${t.key}`]) || 0 })).filter((x) => x.v > 0);
     if (!vals.length) return;
     const best = Math.max(...vals.map((x) => x.v));

@@ -25,10 +25,12 @@
 //                `funds` back from the taker (once a round; now while funds can be spent, else at the next round start)
 //   votes        篡位 (only the captain's vote counts — 逆反 still turns it), 唱反调 (a holder whose vote lost: +funds now)
 // The 损人利己 floor of the fifth version (no teammate's LP below 6, no funds below 0, a cap on each, never an eliminated
-// player): whoever a 〔坏人〕 one of this batch profits from (the snatched shop, the lender, the swapped layers, the item
-// buyer, the funds moved, the bill payers, the tribute, the 联防 helper, the bet's target) holds a grudge against its holder
-// (m.teamGrudge — onTake, 〔坏人〕, 连环计, 以牙还牙 hear it); 以牙还牙 itself takes nothing (no grudge: no loop). Random
-// draws: m.rngMeta (m.teamPickVictim for the 损人利己 targets).
+// player): whoever a 〔坏人〕 one of this batch profits from (the snatched shop, the lender, the swapped layers, the funds
+// moved, the bill payers, the tribute) holds a grudge against its holder (m.teamGrudge — onTake, 〔坏人〕, 连环计, 以牙还牙
+// hear it); 以牙还牙 itself takes nothing (no grudge: no loop). 吃回扣, 借刀杀人 and 双面间谍 take nothing either — the
+// item buyer, the 联防 helper and the bet's target pay nothing, the funds are the game's —: m.teamGrudge with taken false
+// (2026-10-14, 「记仇的惩罚太重了」: each +1 drew a 讨债), still a take of the holder's for 〔坏人〕 2 and 连环计, not one
+// 以牙还牙 answers. Random draws: m.rngMeta (m.teamPickVictim for the 损人利己 targets).
 //
 // The team effects (m.teamFx kind: from → to, amount …; what moves goes from → to):
 //   freeride     the bound teammate → holder: amount null (the bond, at the pick), amount = funds (his merge)
@@ -519,7 +521,7 @@ function tribute(m, st) {
   const n = Math.max(0, int(P('aug_usurp').funds, 1));
   for (const t of matesOf(m, cap)) {
     if (!(t.funds >= n) || !(n > 0)) continue;
-    const got = -t.addFunds(-n, { reason: KEY('aug_usurp') });
+    const got = -t.addFunds(-Math.min(t.funds, n + m.teamRevengeBonus(cap, t)), { reason: KEY('aug_usurp') });
     if (!(got > 0)) continue;
     cap.addFunds(got, { reason: KEY('aug_usurp') });
     m.teamGrudge(t, cap);
@@ -583,7 +585,7 @@ function agentsSettle(m, st) {
     const n = Math.min(max, Math.max(0, int(st.charged.get(t.playerId))));
     if (!(n > 0)) continue;
     credit(h, n);
-    m.teamGrudge(t, h);
+    m.teamGrudge(t, h, { taken: false }); // (the payout is the game's: no grudge — 2026-10-14)
     fx(m, 'doubleAgent', t, h, { amount: n });
     m.toast(h, 'info', msg('双面间谍：{name} 扣了目标生命，下回合 +{n} 资金', { name: t.name, n }));
   }
@@ -608,7 +610,7 @@ function knifeSettle(m) {
     credit(h, n);
     const kills = (x) => Math.max(0, int(per[x.playerId] && per[x.playerId].killed));
     const top = helpers.slice().sort((a, b) => kills(b) - kills(a) || a.seat - b.seat)[0];
-    m.teamGrudge(top, h);
+    m.teamGrudge(top, h, { taken: false }); // (the payout is the game's: no grudge — 2026-10-14)
     fx(m, 'borrowKnife', top, h, { amount: n, also: helpers.filter((x) => x !== top) });
     m.tickerText(msg('{a} 借刀杀人：下回合 +{n} 资金', { a: h.name, n }), 1);
   }
@@ -629,7 +631,7 @@ function kickback(m, buyer, ev) {
     if (!(n > 0)) continue;
     h.counters['aug6:kickback'] = used + 1;
     h.addFunds(n, { reason: KEY('aug_kickback') });
-    m.teamGrudge(buyer, h);
+    m.teamGrudge(buyer, h, { taken: false }); // (the buyer pays nothing: no grudge — 2026-10-14)
     fx(m, 'kickback', buyer, h, { amount: n, item: ev.slot && ev.slot.id ? ev.slot.id : null });
     m.tickerText(msg('{a} 吃了 {b} 的回扣', { a: h.name, b: buyer.name }), 1);
     m.markPublic();
@@ -644,7 +646,7 @@ function splitBill(m, ps, ev) {
   let got = 0;
   for (const t of matesOf(m, ps)) {
     if (!(left > 0)) break;
-    const paid = -t.addFunds(-Math.min(n, left), { reason: KEY('aug_split_bill') });
+    const paid = -t.addFunds(-Math.min(n + m.teamRevengeBonus(ps, t), left), { reason: KEY('aug_split_bill') });
     if (!(paid > 0)) continue;
     ps.addFunds(paid, { reason: KEY('aug_split_bill') });
     left -= paid;
@@ -772,10 +774,11 @@ export const MATCH = Object.freeze({
     knifeSettle(m);
   },
 
-  onTake(m, victim, taker) {
+  onTake(m, victim, taker, info) {
     link(m);
     if (taker && taker.augments.includes('aug_scheme')) schemeTake(taker);
-    if (holds(victim, 'aug_tit_for_tat') && taker && taker.alive) titForTat(m, victim, taker);
+    // (以牙还牙 answers a take: nothing to answer when the holder's gain was the game's — info.taken false)
+    if (holds(victim, 'aug_tit_for_tat') && taker && taker.alive && !(info && info.taken === false)) titForTat(m, victim, taker);
   },
 
   /** 篡位: the captain's playerId when it voted for one of the options (its vote alone counts), else null. */

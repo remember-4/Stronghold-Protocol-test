@@ -1,3 +1,5 @@
+// server/sim/content/kits/ops/chess_char_6_clemnt-clemnt.js — 克莱门莎 (char_4231_clemnt) kit, tier 6 (the friend's 元素
+// roster, docs/ELEMENT-BOND.md; written the 自选 way, every skill under `skills` — shared/opChess.js).
 // 克莱门莎 (char_4231_clemnt), 本源近卫. Official CN tables 2026-10-08 (client 2.7.81),
 // PRTS 克莱门莎, 2026-10-09: all skills at ranks 4/7 and both potential-sensitive talents.
 // https://prts.wiki/w/克莱门莎 . No module was released with her.
@@ -14,6 +16,7 @@ import { bodyInKeys, hitRect } from '../../../body.js';
 import { dirVec } from '../../../dir.js';
 import { COLS } from '../../../constants.js';
 import { hasHp } from '../../../damage.js';
+import { chessKitOf } from '../shared/opChess.js';
 
 const S1 = 'skchr_clemnt_1', S2 = 'skchr_clemnt_2', S3 = 'skchr_clemnt_3';
 const GROUND = Object.freeze({ canHitFly: false, groundOnly: true });
@@ -37,7 +40,7 @@ function touches(e, x, y) {
 }
 
 export default {
-  char_4231_clemnt: (bb, raw) => {
+  chess_char_6_clemnt_a: chessKitOf((bb, raw) => {
     const t0 = talentBb(raw, 0), t1 = talentBb(raw, 1);
     const b1 = skillBb(raw, S1), b2 = skillBb(raw, S2), b3 = skillBb(raw, S3);
     const rider = ({ battle, unit, target, dealt }, ratio) => {
@@ -230,5 +233,5 @@ export default {
         }, { owner: unit });
       },
     };
-  },
+  }),
 };

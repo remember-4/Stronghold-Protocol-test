@@ -1,6 +1,6 @@
 // Active effects list (m.private.effects: band / 机变 / team / item / garrison effects with counters):
 // compact icon column at the right edge, rich-text tooltip per effect. `counterText` (a 悬赏's "还剩 N 场作战", user
-// playtest #6 item 4) replaces the bare counter in the tooltip's kind line.
+// playtest #6 item 4; 维什戴尔's 号召 and its discounts) replaces the bare counter in the tooltip's kind line.
 
 import { html, Tooltip, MicroLabel } from './components.js';
 import { Img, RichText, GIcon } from './gameComponents.js';
@@ -9,6 +9,9 @@ import { data } from '../data.js';
 import { t, tName, N_ } from '../../../shared/i18n.js';
 import { augmentDef, enemyBuffDef } from '../../../shared/augments.js';
 import { sentText } from './lang.js';
+
+/** The icons shown at most (four columns of seven at 16:9, clear of the board); the rest fold into 「+N」. */
+export const EFFECTS_MAX = 28;
 
 const KIND = { band: N_('策略'), choice: N_('机变'), team: N_('团队增益'), item: N_('道具'), garrison: N_('特质'), augment: N_('海克斯'), enemyBuff: N_('敌人强化') };
 
@@ -36,10 +39,13 @@ export function withEnemyBuffs(list, ids) {
 
 /**
  * A 悬赏's counter line in the current language: the battles its enemies still come for (server/match/player/views.js
- * sends the same Chinese text as `counterText` beside the count; a multi-round card has no count).
+ * sends the same Chinese text as `counterText` beside the count; a multi-round card has no count) — and 维什戴尔's
+ * 巴别塔的信号弹 (a band effect: 号召 of 6, the discounts it saved; `counterText` alone from an older server).
  * @param {{ counter?: number|null }} e
  */
-export const bountyCounterText = (e) => (e.iconKind === 'band' && e.counterText ? e.counterText : e.counter == null ? t('之后的每场作战') : t('还剩 {left} 场作战', { left: e.counter }));
+export const bountyCounterText = (e) => (e.iconKind === 'band' && e.counterText
+  ? (e.discounts != null ? t('{rally}/6 号召 · 待用折扣 {discounts}', { rally: e.counter ?? 0, discounts: e.discounts }) : e.counterText)
+  : e.counter == null ? t('之后的每场作战') : t('还剩 {left} 场作战', { left: e.counter }));
 
 /** Data files whose records an effect entry copies its name / description from (by its id or icon id). */
 const SOURCES = ['effects', 'bands', 'items', 'garrisons'];
@@ -77,9 +83,14 @@ export function EffectsList({ effects, onAugAction = null }) {
   const list = (Array.isArray(effects) ? effects : []).filter((e) => e && (e.name || e.desc));
   if (!list.length) return null;
   const m = data.get('assets');
+  // A6000 fork (2026-10-11, a 海克斯 every round): the icons wrap into more columns leftwards (game.css .effects__grid)
+  // instead of running down into the shop bar; past EFFECTS_MAX the rest fold into 「+N」 (its tooltip names them)
+  const shown = list.length > EFFECTS_MAX ? list.slice(0, EFFECTS_MAX - 1) : list;
+  const rest = list.slice(shown.length);
   return html`<div class="effects" aria-label=${t('生效中的效果')}>
     <${MicroLabel}>EFFECTS</${MicroLabel}>
-    ${list.slice(0, 16).map((e, i) => {
+    <div class="effects__grid">
+    ${shown.map((e, i) => {
       const ad = augDefOf(e);
       const act = onAugAction && e.iconKind === 'augment' && ad && ad.action ? () => onAugAction(ad.id) : null;
       const icon = html`<${Img} src=${effectIconUrl(m, e)} fallback=${html`<${GIcon} name="bolt" />`} />
@@ -93,5 +104,9 @@ export function EffectsList({ effects, onAugAction = null }) {
         : html`<span class=${`effect effect--${e.iconKind || 'x'}`}>${icon}</span>`}
     <//>`;
     })}
+    ${rest.length ? html`<${Tooltip} key="more" placement="bottom" text=${html`<div class="efftip">
+        ${rest.map((e) => { const ad = augDefOf(e); return html`<span>${ad ? t(ad.name) : tName(e.name) || t('效果')}<span class="efftip__kind"> · ${t(KIND[e.iconKind] || '')}</span></span>`; })}
+      </div>`}><span class="effect effect--more num">+${rest.length}</span><//>` : null}
+    </div>
   </div>`;
 }

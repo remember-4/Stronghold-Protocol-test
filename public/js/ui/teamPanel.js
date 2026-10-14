@@ -147,7 +147,7 @@ export function TeamPanel({ pub, myId, watching, bubbles, onWatch, compact = fal
           </div>
           <${FxFloats} list=${fx.floats(p.playerId)} />
           ${open && acts.length ? html`<div class="team__acts">${go}
-            ${acts.map((a) => html`<button key=${a.id} type="button" class=${cx('btn', 'btn--sm', a.key === 'sell' ? 'btn--danger' : 'btn--amber', 'team__aug')}
+            ${acts.map((a) => html`<button key=${a.id} type="button" class=${cx('btn', 'btn--sm', a.key === 'sell' || a.key === 'trip' ? 'btn--danger' : 'btn--amber', 'team__aug')}
               data-aug=${a.id} disabled=${a.used || a.busy} title=${a.tip || undefined}
               onClick=${async () => { if (await fx.runAction(a.id, p.playerId)) setOpenPid(null); }}><span class="btn__label">${a.label}</span></button>`)}
           </div>` : open ? go : null}

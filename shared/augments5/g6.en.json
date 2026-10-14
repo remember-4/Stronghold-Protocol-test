@@ -20,7 +20,7 @@
   "跳级": "Skip a Grade",
   "立即免费升级一次调度中心（已满级改为获得 {funds} 资金）": "Immediately upgrade the Dispatch Center once for free (at the top level, gain {funds} funds instead)",
   "升级福利": "Upgrade Perks",
-  "每次升级调度中心，获得与新等级相同次数的免费刷新（存着，跨回合可用）": "Each Dispatch Center upgrade gives as many free refreshes as its new level (they keep across rounds)",
+  "每次升级调度中心，获得与原本等级相同次数的免费刷新（存着，跨回合可用）": "Each Dispatch Center upgrade gives as many free refreshes as its level before the upgrade (they keep across rounds)",
   "幸运刷新": "Lucky Refresh",
   "每次主动刷新有 {pct}% 概率不花资金": "Each manual refresh has a {pct}% chance to cost no funds",
   "刷新券": "Refresh Tickets",

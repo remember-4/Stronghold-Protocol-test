@@ -39,6 +39,36 @@ import { MATCH as AUG5_M11 } from '../augments5/g11.js';
 import { SET_DEFS, setCounts, setLevel } from '../../../shared/augmentSets.js';
 
 const AUG5_MATCH = [AUG5_M1, AUG5_M2, AUG5_M3, AUG5_M4, AUG5_M5, AUG5_M6, AUG5_M7, AUG5_M8, AUG5_M9, AUG5_M10, AUG5_M11];
+/**
+ * 记仇的互动 (the user, 2026-10-11): per GRUDGE_PER_FLOOR grudges the victim's LP floor drops 1 (at most GRUDGE_FLOOR_MAX);
+ * from GRUDGE_BONUS_AT grudges a take is +1 (funds) / +2 (layers); both holding GRUDGE_FEUD+ against each other: 血仇.
+ * (2026-10-14, the user: 「记仇的惩罚太重了 平衡一下」: the floor at most 2 lower — a floor of 6 stops at 4 —, was 3.)
+ */
+const GRUDGE_PER_FLOOR = 2;
+const GRUDGE_FLOOR_MAX = 2;
+const GRUDGE_BONUS_AT = 3;
+const GRUDGE_FEUD = 3;
+/**
+ * 还手 (the user, 2026-10-11: 「队友可以采取一点报复手段」) — the victim's own means, no 海克斯 needed; they spend
+ * grudges and make none (no ping-pong). 不兜底 (automatic): in a 联防 a helper's damage to the enemies leaked by someone
+ * it holds grudges against is GRUDGE_COVER_PCT % lower per grudge (at most GRUDGE_COVER_MAX grudges). A click in the prep
+ * on his row (g.augAction { id, target }), once a round each: 讨债 (1 grudge: GRUDGE_DEBT_FUNDS funds from him) and
+ * 使绊子 (2 grudges: his operators deal GRUDGE_TRIP_PCT % less in his own combat this round). A bot collects (讨债) at the
+ * round start from BOT_DEBT_AT grudges.
+ * 2026-10-14 (「记仇的惩罚太重了 平衡一下」): one grudge stands for one take — mostly 1 funds or 1 LP (收保护费, 顺手牵羊,
+ * 篡位, 公摊, 吸血鬼 …) — and 讨债 took 2 back, the bots at once: most 损人利己 海克斯 lost their holder funds. Now 讨债 takes
+ * 1 (was 2) and a bot lets a single take go (BOT_DEBT_AT 2, was 1); the two that cost the team rather than move something
+ * — 不兜底 (the cover's leaks hit the leaker) and 使绊子 — are −10 % (were −15 %), 不兜底 on at most 2 grudges (was 3:
+ * −20 % at most, was −45 %).
+ */
+export const GRUDGE_COVER_PCT = 10;
+export const GRUDGE_COVER_MAX = 2;
+export const GRUDGE_DEBT_FUNDS = 1;
+export const GRUDGE_TRIP_PCT = 10;
+export const BOT_DEBT_AT = 2;
+export const RV_DEBT = 'aug_rv_debt';
+export const RV_TRIP = 'aug_rv_trip';
+const RV_COST = Object.freeze({ [RV_DEBT]: 1, [RV_TRIP]: 2 });
 
 /** Bot preference of an augment (higher first): the battle ones a board always uses, then the economy. */
 const BOT_AUGMENT = Object.freeze({
@@ -55,6 +85,13 @@ const BOT_AUGMENT = Object.freeze({
   aug_forge: 1, aug_watch: 4, aug_sync: 4, aug_vampire: 4, aug_sacrifice: 1, aug_blame: 4, aug_wheel: 1, aug_legacy: 3,
   aug_elite: 8, aug_reserve: 3, aug_resonance: 7, aug_harmony: 8, aug_first_strike: 7, aug_pierce: 8, aug_echo: 5,
   aug_armory: 5, aug_together: 7, aug_allin: 6, aug_bound: 4, aug_chosen: 6,
+  // the friend's 19 (shared/hexRevision.js USER_AUGMENTS, 2026-10-14; not scanned yet — by what a board without a plan
+  // uses): 不等价交换 never (the funds become the LP: a bot's few funds would end its seat), 亮出你的剑 (every range one
+  // tile ahead: the snipers' and the medics' too) and 掷投狂人 (a bot never rerolls) the lowest
+  aug_u_exchange: -50, aug_u_sword: 1, aug_u_choice_reroll: 1, aug_u_redeploy_hero: 1, aug_u_escape: 1, aug_u_deathcry: 2,
+  aug_u_deploy_shield: 2, aug_u_steadfast: 2, aug_u_arts_juice: 2, aug_u_burn_income: 2, aug_u_homeguard: 3, aug_u_heavy_hit: 3,
+  aug_u_death_ring: 3, aug_u_basics: 3, aug_u_soul_siphon: 4, aug_u_wind_blessing: 4, aug_u_inferno: 5, aug_u_dualstrike: 6,
+  aug_u_infinite_sp: 6,
   // 专属强化: a strategy's own (the bots take one when it is offered, but for 老鲤 III's lost round)
   aug_x_warfarin2: 7, aug_x_warfarin3: 8, aug_x_amiya1: 6, aug_x_amiya2: 6, aug_x_duyaoy1: 6, aug_x_duyaoy3: 7, aug_x_goliath3: 7,
   aug_x_orchid2: 6, aug_x_justin1: 6, aug_x_justin3: 7, aug_x_ermengard1: 6, aug_x_ermengard2: 7, aug_x_lmlee2: 6,
@@ -89,6 +126,8 @@ export class MatchAugments {
     if ([...this.players.values()].some((p) => p.alive && p.augments.includes('aug_x_duck2'))) out = { ...out, duckFreeLp: true };
     // 海克斯·献祭: this round's sacrificers (content/augments.js installTeam lifts every other player's damage)
     if (this.augSacrifice && this.augSacrifice.round === this.round && this.augSacrifice.pids.length) out = { ...out, augSacrifice: this.augSacrifice.pids.slice() };
+    // 还手·使绊子: this round's tripped players (content/augments.js installTeam: their own combat only)
+    if (this.augTrips && this.augTrips.round === this.round && Object.keys(this.augTrips.mul).length) out = { ...out, grudgeTrip: { ...this.augTrips.mul } };
     return out;
   }
 
@@ -106,6 +145,9 @@ export class MatchAugments {
     if (def.noLeftover && this.gd.leftoverKeptBands.includes(ps.bandId)) return false;
     if (def.id === 'aug_vs_times' && !this.factions?.includes('TIMES')) return false;
     if (def.id === 'aug_savings' && this.gd.leftoverKeptBands.includes(ps.bandId)) return false;
+    // A6000 fork: 不等价交换 swaps the player's own LP — none once the team's LP is one pool (the Hidden Core's round); and
+    // never a bot's (its few funds would become its LP): not offered, nor drawn by 盲盒 / 炼金术 (augments5/g5.js drawGeneric)
+    if (def.id === 'aug_u_exchange' && (this.teamLp != null || ps.botControlled)) return false;
     if (def.id === 'aug_x_harold3') {
       const base = this.gd.baseIdOf(def.params.chess);
       return !(this.bannedChess || []).includes(base) && this.pool.has(base);
@@ -503,15 +545,130 @@ export class MatchAugments {
 
   /**
    * 记仇 (the analysis, under 损人利己): `victim` lost something to a 损人利己 海克斯 of `taker` — one grudge more against it
-   * (m.private grudges, the victim's own only). 海克斯第六版: every batch's `onTake(m, victim, taker)` hears it (〔坏人〕,
-   * 连环计, 以牙还牙).
+   * (m.private grudges, the victim's own only). 海克斯第六版: every batch's `onTake(m, victim, taker, { taken })` hears it
+   * (〔坏人〕, 连环计, 以牙还牙).
+   * `taken` false (2026-10-14): the holder gained without taking anything from `victim` — 吃回扣, 借刀杀人, 双面间谍 (the
+   * funds are the game's) — no grudge, no revenge; only the holder's side of onTake (连环计, 〔坏人〕 2) counts it.
    */
-  teamGrudge(victim, taker) {
+  teamGrudge(victim, taker, { taken = true } = {}) {
     if (!victim || !taker || victim === taker) return;
-    const g = (victim.grudges ??= {});
-    g[taker.playerId] = (g[taker.playerId] || 0) + 1;
-    victim.dirty();
-    for (const b of AUG5_MATCH) if (b.onTake) { try { b.onTake(this, victim, taker); } catch (e) { this.reportError('augment onTake', e); } }
+    if (taken) {
+      // 报复 (the user, 2026-10-11: 「给仇恨机制做一点互动」): a take from someone the taker holds a grudge against settles
+      // one of those grudges — the take itself was already worth more (teamFloor, teamRevengeBonus)
+      const owed = this.teamGrudgeOf(taker, victim);
+      if (owed > 0) {
+        taker.grudges[victim.playerId] = owed - 1;
+        taker.dirty();
+        this.tickerText(msg('{a} 报复了 {b}', { a: taker.name, b: victim.name }), 1);
+        this.teamFx('revenge', { from: taker.playerId, to: victim.playerId });
+        this.teamShow(taker, 'revenge');
+      }
+      const g = (victim.grudges ??= {});
+      g[taker.playerId] = (g[taker.playerId] || 0) + 1;
+      victim.dirty();
+      // 血仇: two players holding GRUDGE_FEUD+ against each other — announced once a pair
+      if (this.teamGrudgeOf(victim, taker) >= GRUDGE_FEUD && this.teamGrudgeOf(taker, victim) >= GRUDGE_FEUD) {
+        const pair = [victim.playerId, taker.playerId].sort().join('|');
+        if (!(this.augFeuds ??= new Set()).has(pair)) {
+          this.augFeuds.add(pair);
+          this.tickerText(msg('{a} 和 {b} 结下了血仇', { a: victim.name, b: taker.name }), 2);
+          this.teamFx('feud', { from: victim.playerId, to: taker.playerId });
+        }
+      }
+    }
+    const info = { taken: !!taken };
+    for (const b of AUG5_MATCH) if (b.onTake) { try { b.onTake(this, victim, taker, info); } catch (e) { this.reportError('augment onTake', e); } }
+  }
+
+  /** 记仇: how many grudges `holder` holds against `target` (0 without). */
+  teamGrudgeOf(holder, target) {
+    const g = holder && target && holder.grudges;
+    return g ? Math.max(0, Math.trunc(Number(g[target.playerId]) || 0)) : 0;
+  }
+
+  /**
+   * 报复降底线 (2026-10-11): the LP floor `base` that protects `victim` from a 损人利己 take of `taker` — one lower per
+   * GRUDGE_PER_FLOOR grudges the taker holds against the victim, at most GRUDGE_FLOOR_MAX lower, never under 1.
+   */
+  teamFloor(taker, victim, base) {
+    const g = this.teamGrudgeOf(taker, victim);
+    return Math.max(1, Math.trunc(Number(base) || 0) - Math.min(GRUDGE_FLOOR_MAX, Math.floor(g / GRUDGE_PER_FLOOR)));
+  }
+
+  /** 报复加码 (2026-10-11): +1 to a funds take (+2 to a layers take: the caller doubles it) at GRUDGE_BONUS_AT+ grudges. */
+  teamRevengeBonus(taker, victim) {
+    return this.teamGrudgeOf(taker, victim) >= GRUDGE_BONUS_AT ? 1 : 0;
+  }
+
+  /**
+   * 还手·不兜底: the 联防 battle flag `grudgeCover` — helper → leaker → the helper's damage multiplier against that leaker's
+   * enemies (only the pairs with a grudge; null without any). The ticker names each pair once a 联防.
+   */
+  teamCoverFlags(plan, { announce = false } = {}) {
+    const out = {};
+    for (const h of (plan && plan.helpers) || []) {
+      for (const l of (plan && plan.leakers) || []) {
+        const g = Math.min(GRUDGE_COVER_MAX, this.teamGrudgeOf(h, l));
+        if (!(g > 0) || h === l) continue;
+        const pct = GRUDGE_COVER_PCT * g;
+        (out[h.playerId] ??= {})[l.playerId] = Math.round((1 - pct / 100) * 1e6) / 1e6;
+        if (announce) {
+          this.tickerText(msg('{a} 不想给 {b} 兜底：对他漏过来的敌人伤害 −{pct}%', { a: h.name, b: l.name, pct }), 1);
+          this.teamFx('noCover', { from: h.playerId, to: l.playerId, amount: pct });
+        }
+      }
+    }
+    return Object.keys(out).length ? out : null;
+  }
+
+  /**
+   * 还手 (g.augAction { id: aug_rv_debt | aug_rv_trip, target }): `ps` spends grudges against the teammate `targetId` —
+   * 讨债 (GRUDGE_DEBT_FUNDS of his funds) or 使绊子 (his own combat this round: GRUDGE_TRIP_PCT % less damage); once a
+   * round each. The checks of the phase are augmentAction's; a bot calls it at the round start (augmentsRoundStart).
+   */
+  teamRetaliate(ps, id, targetId) {
+    const cost = RV_COST[id];
+    const t = typeof targetId === 'string' ? this.players.get(targetId) : null;
+    if (!cost || this.isSolo || !t || t === ps || !t.alive || !(t.lp > 0)) return fail(ERR.BAD_TARGET);
+    const key = `rv:${id}`;
+    if (ps.counters[key] === this.round) return fail(ERR.ALREADY, 'once a round');
+    const owed = this.teamGrudgeOf(ps, t);
+    if (owed < cost) return fail(ERR.BAD_TARGET, 'not enough grudges');
+    if (id === RV_DEBT) {
+      if (!(t.funds > 0)) return fail(ERR.BAD_TARGET, 'no funds');
+      const n = -t.addFunds(-Math.min(t.funds, GRUDGE_DEBT_FUNDS), { reason: 'revenge:debt' });
+      ps.addFunds(n, { reason: 'revenge:debt' });
+      this.tickerText(msg('{a} 向 {b} 讨债：{n} 资金', { a: ps.name, b: t.name, n }), 1);
+      this.teamFx('debt', { from: t.playerId, to: ps.playerId, amount: n });
+    } else {
+      if (this.round === this.gd.bossRound || this.round === this.gd.hiddenRound) return fail(ERR.BAD_TARGET, 'no own combat this round');
+      if (!this.augTrips || this.augTrips.round !== this.round) this.augTrips = { round: this.round, mul: {} };
+      const was = Number(this.augTrips.mul[t.playerId]) || 1;
+      this.augTrips.mul[t.playerId] = Math.round(was * (1 - GRUDGE_TRIP_PCT / 100) * 1e6) / 1e6;
+      this.tickerText(msg('{a} 给 {b} 使了绊子：他本回合的干员伤害 −{pct}%', { a: ps.name, b: t.name, pct: GRUDGE_TRIP_PCT }), 1);
+      this.teamFx('trip', { from: ps.playerId, to: t.playerId, amount: GRUDGE_TRIP_PCT });
+    }
+    ps.grudges[t.playerId] = owed - cost;
+    ps.counters[key] = this.round;
+    this.teamShow(ps, 'revenge');
+    ps.dirty();
+    t.dirty();
+    this.markPrivate(ps);
+    this.markPrivate(t);
+    this.markPublic();
+    return OK;
+  }
+
+  /**
+   * 还手 of a bot (the round start): 讨债 the teammate it holds the most grudges against (seat order on a tie) — BOT_DEBT_AT+
+   * of them: a single take goes —, if he has funds.
+   */
+  _botRetaliate(ps) {
+    const g = ps.grudges || {};
+    const at = Math.max(RV_COST[RV_DEBT], BOT_DEBT_AT);
+    const t = this._mates(ps).filter((m) => (g[m.playerId] || 0) >= at && m.funds > 0)
+      .sort((a, b) => (g[b.playerId] || 0) - (g[a.playerId] || 0) || a.seat - b.seat)[0];
+    if (t) this.teamRetaliate(ps, RV_DEBT, t.playerId);
   }
 
   /**
@@ -544,7 +701,7 @@ export class MatchAugments {
       if (ps.augments.includes('aug_vampire')) {
         const p = augmentDef('aug_vampire').params;
         const used = ps.counters['aug:vampire:n'] ?? 0;
-        const mate = this._mates(ps).filter((m) => m.lp > p.floor).sort((a, b) => b.lp - a.lp || a.seat - b.seat)[0];
+        const mate = this._mates(ps).filter((m) => m.lp > this.teamFloor(ps, m, p.floor)).sort((a, b) => b.lp - a.lp || a.seat - b.seat)[0];
         if (used < p.max && mate) {
           mate.lp -= 1;
           mate.stats.lpLost += 1;
@@ -565,10 +722,11 @@ export class MatchAugments {
         const from = ps.counters['aug:rob:from'] ?? this.round;
         const mate = this._mates(ps).filter((m) => m.funds >= p.funds).sort((a, b) => b.funds - a.funds || a.seat - b.seat)[0];
         if (this.round > from && (this.round - from) % p.every === 0 && mate) {
-          mate.addFunds(-p.funds, { reason: 'augment:aug_rob' });
-          ps.addFunds(p.funds, { reason: 'augment:aug_rob' });
-          this.tickerText(msg('{a} 打劫了 {b}：{n} 资金', { a: ps.name, b: mate.name, n: p.funds }), 1);
-          this.teamFx('rob', { from: mate.playerId, to: ps.playerId, amount: p.funds, augment: 'aug_rob' });
+          const n = Math.min(mate.funds, p.funds + this.teamRevengeBonus(ps, mate));
+          mate.addFunds(-n, { reason: 'augment:aug_rob' });
+          ps.addFunds(n, { reason: 'augment:aug_rob' });
+          this.tickerText(msg('{a} 打劫了 {b}：{n} 资金', { a: ps.name, b: mate.name, n }), 1);
+          this.teamFx('rob', { from: mate.playerId, to: ps.playerId, amount: n, augment: 'aug_rob' });
           this.teamGrudge(mate, ps);
           this.teamShow(ps, 'rob');
         }
@@ -585,6 +743,8 @@ export class MatchAugments {
       this.teamFx('bomb', { from: at >= 0 ? prev : null, to: next.playerId, also: [bomb.owner], augment: 'aug_bomb' });
     }
     this._aug5Hook('roundStart');
+    // 还手: a bot holding grudges collects (讨债) — after this round start's takes
+    if (!this.isSolo) for (const ps of this.alivePlayers()) if (ps.isBot && ps.grudges) this._botRetaliate(ps);
   }
 
   /** 海克斯第五版: a batch hook on every batch that has it (errors reported, the flow goes on). */
@@ -711,6 +871,8 @@ export class MatchAugments {
     if (this.phase !== PHASE.PREP) return fail(ERR.WRONG_PHASE);
     if (!ps.alive) return fail(ERR.ELIMINATED);
     if (ps.ready || this.augmentLocked(ps)) return fail(ERR.WRONG_PHASE);
+    // 还手 (2026-10-11): no 海克斯 of the player's — its grudges
+    if (id === RV_DEBT || id === RV_TRIP) return this.teamRetaliate(ps, id, target);
     const def = augmentDef(id);
     if (!def || !def.action || !ps.augments.includes(id)) return fail(ERR.BAD_TARGET);
     if (ps.counters[`aug:act:${id}`] === this.round) return fail(ERR.ALREADY, 'once a round');

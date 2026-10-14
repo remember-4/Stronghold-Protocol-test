@@ -63,9 +63,12 @@ const BOT_HARM = Object.freeze({
   // 首领专场
   eb_b_rage: 5, eb_b_awe: 4, eb_b_guard: 4, eb_b_wall: 6, eb_b_clock: 5, eb_b_escort: 6, eb_b_tough: 8, eb_b_fury: 7,
   eb_b_physward: 4, eb_b_artsward: 4, eb_b_dread: 5, eb_b_summon: 6, eb_b_barrier: 6, eb_b_cap: 4, eb_b_resonance: 5, eb_b_revive: 7,
+  // the friend's 14 (shared/enemyBuffs.js eb_n_*, 2026-10-14): by their numbers against the table's
+  eb_n_health: 3, eb_n_power: 3, eb_n_speed: 4, eb_n_defense: 4, eb_n_arts: 5, eb_n_phys: 5, eb_n_regen: 5, eb_n_shatter: 3,
+  eb_n_element: 3, eb_n_slow: 7, eb_n_wall: 8, eb_n_hunter: 3, eb_n_b_guard: 4, eb_n_b_doom: 7,
 });
-const PHYS_HARM = new Set(['eb_armor', 'eb_evasion', 'eb_b_physward']);
-const ARTS_HARM = new Set(['eb_res', 'eb_artsward', 'eb_b_artsward']);
+const PHYS_HARM = new Set(['eb_armor', 'eb_evasion', 'eb_b_physward', 'eb_n_defense', 'eb_n_phys']);
+const ARTS_HARM = new Set(['eb_res', 'eb_artsward', 'eb_b_artsward', 'eb_n_arts']);
 /** 首领·召唤: the escorts a boss field's spec carries — every sec s, this many times (600 game s at 30 s; the drain of the
  * overtime starts at 300). */
 export const SUMMON_HORIZON = 20;

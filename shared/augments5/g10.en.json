@@ -35,7 +35,7 @@
   "你最右一列的干员恰好有 {n} 名时，它们受到的伤害降低 {taken}%，造成的伤害提升至 {dealt}%": "When exactly {n} operators stand in your right-most column, they take {taken}% less damage and deal {dealt}% damage",
   "前排掩护": "Front-Line Cover",
   "你最右两列的干员每有 1 名，其余干员造成的伤害提升 {pct}%（连乘，至多算 {max} 名）": "For every operator in your two right-most columns, your other operators deal {pct}% more damage (multiplied together; counting at most {max})",
-  "最后防线": "Last Line",
+  "城墙之子": "Child of the Walls",
   "蓝门（保护点）周围 {dist} 格内的干员阻挡数 +{block}，受到的伤害降低 {taken}%": "Operators within {dist} {dist|tile|tiles} of the Blue Gate (Protection Objective) get Block +{block} and take {taken}% less damage",
   "风水宝地": "Feng Shui Spot",
   "每回合开始时随机标出 {n} 个可部署的格子（休整期在棋盘上描金边）：本回合站在上面的干员造成的伤害提升至 {dealt}%": "At the start of each round, {n} random deployable tiles are marked (framed in gold on your board during the prep): this round, operators standing on them deal {dealt}% damage",

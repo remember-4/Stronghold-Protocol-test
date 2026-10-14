@@ -393,6 +393,27 @@ function installTeam(battle) {
       for (const u of battle.allyUnits) if (isOp(u) && u.ownerId !== pid) passiveBuff(battle, u, `${KEY('aug_sacrifice')}:${pid}`, { augDealtMul: pct(p.pct) }, { visible: true });
     }
   }
+  // 还手 (the user, 2026-10-11; server/match/match/augments.js teamRetaliate / teamCoverFlags). 使绊子: the tripped
+  // player's operators in his own combat (playerId → damage multiplier). 不兜底: in a 联防, a helper's units against the
+  // enemies of a leaker it holds grudges against (helper → leaker → multiplier)
+  const trip = battle.kind === 'normal' && battle.flags && battle.flags.grudgeTrip;
+  if (trip && typeof trip === 'object') {
+    for (const u of battle.allyUnits) {
+      const mul = Number(trip[u.ownerId]);
+      if (isOp(u) && mul > 0 && mul < 1) passiveBuff(battle, u, 'grudge:trip', { augDealtMul: mul });
+    }
+  }
+  const cover = battle.kind === 'unite' && battle.flags && battle.flags.grudgeCover;
+  if (cover && typeof cover === 'object') {
+    battle.on('hit', (c) => {
+      const s = c.credit;
+      const t = c.target;
+      if (!c.dmg || !s || s.side !== 'ally' || !t || t.side !== 'enemy' || !t.sourcePlayerId) return;
+      const row = cover[s.ownerId];
+      const mul = row && typeof row === 'object' ? Number(row[t.sourcePlayerId]) : NaN;
+      if (mul > 0 && mul < 1) c.dmg.augMul *= mul;
+    });
+  }
 }
 
 function installPlayer(battle, ps, ids) {
